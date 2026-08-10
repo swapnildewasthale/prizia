@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Audiowide, Comfortaa } from "next/font/google";
 import "./globals.css";
-import PriziaShell from "@/components/prizia/PriziaShell";
 
-const inter = Inter({
+const audiowide = Audiowide({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: "400",
+  variable: "--font-audiowide",
+  display: "swap",
+});
+
+const comfortaa = Comfortaa({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-comfortaa",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>{children}</body>
+      <body className={`${audiowide.variable} ${comfortaa.variable} font-sans antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }
