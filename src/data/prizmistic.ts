@@ -20,6 +20,26 @@ export const events = [
     active: true,
   },
   {
+    id: "photography-workshop-1",
+    title: "Photography Workshop",
+    description:
+      "Learn to see more deliberately and use photography to observe, communicate, document, and create. Covers composition, light, storytelling, and hands-on practice.",
+    schedule: "Check current schedule",
+    day: "TBD",
+    time: "TBD",
+    active: true,
+  },
+  {
+    id: "music-workshop-1",
+    title: "Music Workshop",
+    description:
+      "A practical space to explore sound, rhythm, listening, expression, collaboration, and musical curiosity. For everyone — no prior experience needed.",
+    schedule: "Check current schedule",
+    day: "TBD",
+    time: "TBD",
+    active: true,
+  },
+  {
     id: "clay-intro-1",
     title: "Clay Introduction",
     description:

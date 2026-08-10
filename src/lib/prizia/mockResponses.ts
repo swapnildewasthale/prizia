@@ -1,6 +1,6 @@
 import { Domain, Message, PriziaResponse } from "./types";
 import { prizmistic, events } from "@/data/prizmistic";
-import { aiTopics } from "@/data/domains/ai";
+import { searchKnowledge, getActiveDomains, isActiveDomain } from "./knowledge";
 
 // FUTURE: Replace mock engine with real AI/Supercode integration.
 // When connecting a real AI, feed src/data/prizia.md as system context.
@@ -26,10 +26,12 @@ export function getPriziaResponse(
   }
 
   if (isCasual(lower)) {
+    const domains = getActiveDomains();
+    const domainList = domains.join(", ");
     return {
       mode: "CHAT",
-      text: "That's kind of you. I'm here to explore what we're learning and creating at Prizmistic — a place for learning, making, experimenting, and bringing ideas together. Right now, we're deep into AI.",
-      suggestions: ["Explore AI", "What's happening here?"],
+      text: `That's kind of you. I'm here to explore what we're learning and creating at Prizmistic — a place for learning, making, experimenting, and bringing ideas together. Right now, we're exploring ${domainList}.`,
+      suggestions: domains.map((d) => `${d} Workshop`).slice(0, 3),
     };
   }
 
@@ -46,28 +48,10 @@ export function getPriziaResponse(
     return handlePrizmisticQuestion(lower);
   }
 
-  // --- REDIRECT: clearly outside scope ---
-  if (isOutOfScope(lower)) {
-    return {
-      mode: "REDIRECT",
-      text: "That's a little outside what I'm here to explore with you. I'm built specifically for Prizmistic and what we're learning, creating, and organizing here. Right now, that's AI. Want to dive into that?",
-      suggestions: ["Explore AI", "What's happening here?"],
-    };
-  }
-
-  // --- UNKNOWN: about Prizmistic but no info ---
-  if (isUnknownPrizmistic(lower)) {
-    return {
-      mode: "UNKNOWN",
-      text: "I don't have that information right now. I don't want to guess and tell you something that isn't true. You can ask me about the spaces, activities, and workshops I do have information about.",
-      suggestions: ["Tell me about Prizmistic", "Explore AI"],
-    };
-  }
-
-  // --- TEACH/CONNECT: AI domain questions ---
-  const aiResponse = findAIResponse(lower);
-  if (aiResponse) {
-    return aiResponse;
+  // --- TEACH/CONNECT: Knowledge-based responses from prizia.md ---
+  const knowledgeResponse = findKnowledgeResponse(lower);
+  if (knowledgeResponse) {
+    return knowledgeResponse;
   }
 
   // --- Context-aware follow-ups ---
@@ -77,10 +61,12 @@ export function getPriziaResponse(
   }
 
   // --- Default: mild redirect ---
+  const defaultDomains = getActiveDomains();
+  const defaultDomainList = defaultDomains.join(", ");
   return {
     mode: "CHAT",
-    text: "I'm not sure how to help with that right now. I'm focused on what Prizmistic is exploring — and right now, that's AI. Want to dive into that?",
-    suggestions: ["Explore AI", "What's happening here?", "Tell me about Prizmistic"],
+    text: `I'm not sure how to help with that right now. I'm focused on what Prizmistic is exploring — ${defaultDomainList}. Want to dive into any of those?`,
+    suggestions: defaultDomains.map((d) => `${d} Workshop`).slice(0, 3),
   };
 }
 
@@ -94,20 +80,32 @@ function isCasual(msg: string): boolean {
 }
 
 function isAboutPrizmistic(msg: string): boolean {
+  // Check if the message is about any active domain
+  const activeDomains = getActiveDomains();
+  for (const domain of activeDomains) {
+    if (msg.toLowerCase().includes(domain.toLowerCase())) {
+      return false; // Let the knowledge handler deal with domain-specific queries
+    }
+  }
+
   return /prizmistic|what (is|are) (this|here|prizmistic)|tell me about|what'?s?\s+happening|whats happening|what do you|what does prizmistic|who started|who runs|what kind of (place|space|community)|is this (a|an) (school|college|class|cowork|center)/.test(msg) &&
     !isOutOfScope(msg) &&
     !isUnknownPrizmistic(msg);
 }
 
 function handlePrizmisticQuestion(msg: string): PriziaResponse {
+  const activeDomains = getActiveDomains();
+  const domainList = activeDomains.join(", ");
+
   if (/what'?s?\s+happening|events|workshop|classes|sessions|what'?s?\s+on|current|now|right now|today/.test(msg)) {
-    const activeEvent = events.find((e) => e.active);
+    const activeEvents = events.filter((e) => e.active);
+    const eventList = activeEvents.map((e) => e.title).join(", ");
     return {
       mode: "DIRECT",
-      text: activeEvent
-        ? `Right now, Prizmistic is running the ${activeEvent.title} — ${activeEvent.description} It's scheduled for ${activeEvent.schedule}. We're exploring AI as a practical tool for learning, research, creativity, and work.`
-        : "I don't have specific event details right now, but Prizmistic is always exploring new things. Currently, we're focused on AI.",
-      suggestions: ["Tell me about the workshop", "What is AI?"],
+      text: activeEvents.length > 0
+        ? `Right now, Prizmistic is running ${eventList}. We're exploring ${domainList} as practical tools for learning, creativity, and expression.`
+        : `I don't have specific event details right now, but Prizmistic is always exploring new things. Currently, we're focused on ${domainList}.`,
+      suggestions: activeDomains.map((d) => `${d} Workshop`).slice(0, 3),
     };
   }
 
@@ -122,8 +120,8 @@ function handlePrizmisticQuestion(msg: string): PriziaResponse {
   if (/what (kind|type) of (place|space|community)|what is prizmistic|describe|explain|about prizmistic/.test(msg)) {
     return {
       mode: "DIRECT",
-      text: `${prizmistic.name} is ${prizmistic.description} It's not just a classroom, coworking space, or event venue — it's an environment where people can come with curiosity and find opportunities to learn something, make something, experiment with ideas, attend workshops, and meet interesting people. The subjects and experiences evolve over time.`,
-      suggestions: ["What's happening now?", "Explore AI"],
+      text: `${prizmistic.name} is ${prizmistic.description} It's not just a classroom, coworking space, or event venue — it's an environment where people can come with curiosity and find opportunities to learn something, make something, experiment with ideas, attend workshops, and meet interesting people. We're currently exploring ${domainList}.`,
+      suggestions: ["What's happening now?", ...activeDomains.map((d) => `${d} Workshop`).slice(0, 2)],
     };
   }
 
@@ -137,45 +135,74 @@ function handlePrizmisticQuestion(msg: string): PriziaResponse {
 
   return {
     mode: "DIRECT",
-    text: `${prizmistic.name} is ${prizmistic.description} We're currently focused on exploring AI — learning how to use it, build with it, and understand what it means for creativity and work. But that's just the beginning.`,
-    suggestions: ["Explore AI", "What's the AI workshop?"],
+    text: `${prizmistic.name} is ${prizmistic.description} We're currently exploring ${domainList} — learning, creating, and experimenting with these subjects in practical ways.`,
+    suggestions: activeDomains.map((d) => `${d} Workshop`).slice(0, 3),
   };
 }
 
 function isOutOfScope(msg: string): boolean {
+  // Check if the message is about any active domain
+  const activeDomains = getActiveDomains();
+  for (const domain of activeDomains) {
+    if (msg.toLowerCase().includes(domain.toLowerCase())) {
+      return false; // Don't block domain-specific queries
+    }
+  }
+
   const outOfScope = [
-    /capital of|population of|weather (in|today|tomorrow)|stock (price|market)|share price|recipe|horoscope|sports (score|result|match)|game result|movie (review|rating|release)|song (by|lyrics)|music recommendation|politic|election|religion|dating advice|love life|relationship advice|medical (advice|diagnosis)|health advice|legal advice|investment advice|cryptocurrency|bitcoin price|travel (booking|flights|hotel|deal)|restaurant (near|recommend)|recipe for|weather forecast|lottery (result|winner|number)|football (match|result|score)|soccer|basketball|cricket (match|score)|tennis|nba|nfl|fifa|world cup|olympics|president|prime minister|ceo of|elon musk|trump|biden|openai (stock|valuation)|google (stock|finance)|apple (stock|finance)|tesla (stock)|meta (stock)|amazon (stock)|microsoft (stock)/
+    /capital of|population of|weather (in|today|tomorrow)|stock (price|market)|share price|recipe|horoscope|sports (score|result|match)|game result|movie (review|rating|release)|politic|election|religion|dating advice|love life|relationship advice|medical (advice|diagnosis)|health advice|legal advice|investment advice|cryptocurrency|bitcoin price|travel (booking|flights|hotel|deal)|restaurant (near|recommend)|recipe for|weather forecast|lottery (result|winner|number)|football (match|result|score)|soccer|basketball|cricket (match|score)|tennis|nba|nfl|fifa|world cup|olympics|president|prime minister|ceo of|elon musk|trump|biden|openai (stock|valuation)|google (stock|finance)|apple (stock|finance)|tesla (stock)|meta (stock)|amazon (stock)|microsoft (stock)/
   ];
   return outOfScope.some((re) => re.test(msg));
 }
 
 function isUnknownPrizmistic(msg: string): boolean {
+  // Check if the message is about any active domain
+  const activeDomains = getActiveDomains();
+  for (const domain of activeDomains) {
+    if (msg.toLowerCase().includes(domain.toLowerCase())) {
+      return false; // Don't block domain-specific queries
+    }
+  }
+
   return /photography (studio|equipment)|gym|pool|sauna|parking|garage|upstairs|downstairs|basement|roof|garden|pet friendly|animal|room\s*\d|floor\s*\d|number of (people|students|members)|capacity|price|cost|membership|fee|staff|teacher name|instructor name|owner name|founder name|who runs|who started|address|location|where (are|is) you|how (far|do i get|to get)/.test(msg) &&
     !/prizia|prizmistic|workshop|ai|art|clay|create|learn|explore|making/.test(msg);
 }
 
-function findAIResponse(msg: string): PriziaResponse | null {
-  for (const [topic, response] of Object.entries(aiTopics)) {
-    if (msg.includes(topic)) {
-      return { mode: "TEACH", text: response.text, suggestions: response.suggestions };
-    }
+function findKnowledgeResponse(msg: string): PriziaResponse | null {
+  // Search the knowledge base for relevant sections
+  const relevantSections = searchKnowledge(msg);
+
+  if (relevantSections.length === 0) {
+    return null;
   }
 
-  // Partial match for AI-related queries
-  if (/ai|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(msg)) {
-    return {
-      mode: "TEACH",
-      text: "That's a great question about AI. AI is a broad field — could you be more specific about what you'd like to explore? I can help with topics like AI agents, generative AI, prompting, machine learning, or how AI is being used at Prizmistic.",
-      suggestions: [
-        "What is an AI agent?",
-        "What is generative AI?",
-        "How do I write good prompts?",
-        "What's the AI workshop?",
-      ],
-    };
+  // Get the most relevant section
+  const topSection = relevantSections[0];
+
+  // Clean up the content - remove markdown formatting
+  let content = topSection.content
+    .replace(/#{1,6}\s+/g, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/-{3,}/g, "")
+    .trim();
+
+  // Truncate if too long
+  if (content.length > 800) {
+    content = content.substring(0, 800) + "...";
   }
 
-  return null;
+  // Generate suggestions based on active domains
+  const activeDomains = getActiveDomains();
+  const suggestions = activeDomains.map((d) => `${d} Workshop`).slice(0, 3);
+
+  return {
+    mode: "TEACH",
+    text: content,
+    suggestions,
+  };
 }
 
 function handleFollowUp(msg: string, lastAssistant: Message): PriziaResponse | null {
