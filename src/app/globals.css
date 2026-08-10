@@ -3,9 +3,9 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --color-prizia-bg: #F7F7F9;
+  --color-prizia-bg: #101015;
   --color-prizia-white: #FFFFFF;
-  --color-prizia-ink: #0E0E13;
+  --color-prizia-ink: #FFF2DC;
   --color-prizia-secondary: #33333D;
   --color-prizia-muted: #6B6B78;
   --color-prizia-border: #D1D1D6;
@@ -78,14 +78,14 @@ html {
 }
 
 body {
-  background-color: #F7F7F9;
-  color: #0E0E13;
+  background-color: #101015;
+  color: #FFF2DC;
 }
 
 /* --- Focus Visible --- */
 
 :focus-visible {
-  outline: 2px solid #6E47EB;
+  outline: 2px solid #FFAD0D;
   outline-offset: 2px;
 }
 
