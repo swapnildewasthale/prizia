@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 const prompts = ["Explore AI", "What’s happening here?", "Tell me about Prizmistic"];
@@ -34,16 +35,20 @@ export default function PriziaShell() {
       <main className="flex min-h-[calc(100vh-112px)] items-center justify-center px-5 pb-24 sm:px-10">
         <section className="flex w-full max-w-3xl flex-col items-center text-center">
           <div aria-hidden="true" className="mb-5 flex h-28 items-center justify-center sm:mb-7">
-            <svg className="h-28 w-28" viewBox="0 0 120 120" fill="none">
-              <path d="M56 15c9-9 23-9 32 0l10 10c9 9 9 23 0 32L71 84l19 19H67L47 83l-9 9H16l20-20-17-17c-9-9-9-23 0-32l10-10c9-9 23-9 32 0l17 17-13 13-17-17c-4-4-10-4-14 0L29 29c-4 4-4 10 0 14l31 31 27-27c4-4 4-10 0-14l-10-10c-4-4-10-4-14 0L42 44 29 31 56 15Z" fill="#fff2dc" />
-              <path d="M96 83 106 103H86l10-20Z" fill="#d88024" />
-            </svg>
+            <Image
+              src="/prizia-icon-light.png"
+              alt=""
+              width={112}
+              height={112}
+              priority
+              className="h-28 w-28 object-contain"
+            />
           </div>
 
-          <h1 className="font-[family-name:var(--font-inter)] text-4xl font-medium tracking-[-0.06em] text-[#fff2dc] sm:text-6xl">
+          <h1 className="font-[family-name:var(--font-audiowide)] text-3xl font-normal tracking-[-0.055em] text-[#fff2dc] sm:text-5xl">
             Hi, I’m Prizia.
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#fbf1df] sm:text-2xl">
+          <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-[#fbf1df] sm:text-2xl">
             I know what’s happening at Prizmistic.
             <br />
             What are you curious about?
