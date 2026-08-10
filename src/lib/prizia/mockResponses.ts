@@ -2,7 +2,8 @@ import { Domain, Message, PriziaResponse } from "./types";
 import { prizmistic, events } from "@/data/prizmistic";
 import { aiTopics } from "@/data/domains/ai";
 
-// FUTURE: Replace this mock response engine with real AI/Supercode integration.
+// FUTURE: Replace mock engine with real AI/Supercode integration.
+// When connecting a real AI, feed src/data/prizia.md as system context.
 // The getPriziaResponse function signature should remain the same for easy handoff.
 
 export function getPriziaResponse(
@@ -19,7 +20,7 @@ export function getPriziaResponse(
   if (isGreeting(lower)) {
     return {
       mode: "CHAT",
-      text: "Hey! I'm Prizia — the conversational intelligence of Prizmistic. What are you curious about?",
+      text: "Hey! I'm Prizia — the conversational intelligence of Prizmistic. I know what's happening here and can explore the subjects we're learning and creating. What are you curious about?",
       suggestions: ["Explore AI", "What's happening here?", "Tell me about Prizmistic"],
     };
   }
@@ -27,8 +28,16 @@ export function getPriziaResponse(
   if (isCasual(lower)) {
     return {
       mode: "CHAT",
-      text: "That's kind of you. I'm here to explore what we're learning and creating at Prizmistic. Right now, that's AI.",
+      text: "That's kind of you. I'm here to explore what we're learning and creating at Prizmistic — a place for learning, making, experimenting, and bringing ideas together. Right now, we're deep into AI.",
       suggestions: ["Explore AI", "What's happening here?"],
+    };
+  }
+
+  if (/who (is|are) you|are you (a )?real|what are you|tell me about yourself|your purpose/.test(lower)) {
+    return {
+      mode: "CHAT",
+      text: "Nope, I'm not a real person. I'm Prizia — an AI built to be the conversational intelligence of Prizmistic. My job is to know what's happening here and help you explore the subjects we're learning, creating, and experimenting with.",
+      suggestions: ["What is Prizmistic?", "What are you exploring?"],
     };
   }
 
@@ -41,7 +50,7 @@ export function getPriziaResponse(
   if (isOutOfScope(lower)) {
     return {
       mode: "REDIRECT",
-      text: `That's a little outside what I'm here to explore with you. I'm built specifically for Prizmistic and what we're learning, creating, and organizing here. Right now, that's AI.`,
+      text: "That's a little outside what I'm here to explore with you. I'm built specifically for Prizmistic and what we're learning, creating, and organizing here. Right now, that's AI. Want to dive into that?",
       suggestions: ["Explore AI", "What's happening here?"],
     };
   }
@@ -70,62 +79,78 @@ export function getPriziaResponse(
   // --- Default: mild redirect ---
   return {
     mode: "CHAT",
-    text: "I'm not sure how to help with that. I'm focused on what Prizmistic is exploring — right now, AI. Want to dive into that?",
+    text: "I'm not sure how to help with that right now. I'm focused on what Prizmistic is exploring — and right now, that's AI. Want to dive into that?",
     suggestions: ["Explore AI", "What's happening here?", "Tell me about Prizmistic"],
   };
 }
 
 function isGreeting(msg: string): boolean {
-  return /^(hi|hello|hey|yo|sup|hiya|howdy|greetings|good morning|good afternoon|good evening|what's up|whats up)\b/.test(msg);
+  return /^(hi|hello|hey|yo|sup|hiya|howdy|greetings|good morning|good afternoon|good evening|what'?s?\s*up|whats\s*up)\b/.test(msg);
 }
 
 function isCasual(msg: string): boolean {
-  return /^(you'?re?\s+(cool|awesome|great|amazing|nice|cute|fun)|thanks|thank you|ok|okay|cool|nice|lol|haha|lol that|that'?s?\s+(cool|funny|interesting))/.test(msg) ||
+  return /^(you'?re?\s+(cool|awesome|great|amazing|nice|cute|fun|smart)|thanks|thank you|ok|okay|cool|nice|lol|haha|lol that|that'?s?\s+(cool|funny|interesting)|i like you|you'?re?\s+the best)/.test(msg) ||
     msg.length < 6;
 }
 
 function isAboutPrizmistic(msg: string): boolean {
-  return /prizmistic|what (is|are) (this|here|prizmistic)|tell me about|what'?s?\s+happening|whats happening|what do you|what does prizmistic|who (is|are) you|prizia/.test(msg) &&
+  return /prizmistic|what (is|are) (this|here|prizmistic)|tell me about|what'?s?\s+happening|whats happening|what do you|what does prizmistic|who started|who runs|what kind of (place|space|community)|is this (a|an) (school|college|class|cowork|center)/.test(msg) &&
     !isOutOfScope(msg) &&
     !isUnknownPrizmistic(msg);
 }
 
 function handlePrizmisticQuestion(msg: string): PriziaResponse {
-  if (/what'?s?\s+happening|events|workshop|classes|sessions|what'?s?\s+on/.test(msg)) {
+  if (/what'?s?\s+happening|events|workshop|classes|sessions|what'?s?\s+on|current|now|right now|today/.test(msg)) {
     const activeEvent = events.find((e) => e.active);
     return {
       mode: "DIRECT",
       text: activeEvent
-        ? `Right now, Prizmistic is running the ${activeEvent.title} — ${activeEvent.description} It's scheduled for ${activeEvent.schedule}.`
-        : "I don't have specific event details right now, but Prizmistic is always exploring new things.",
+        ? `Right now, Prizmistic is running the ${activeEvent.title} — ${activeEvent.description} It's scheduled for ${activeEvent.schedule}. We're exploring AI as a practical tool for learning, research, creativity, and work.`
+        : "I don't have specific event details right now, but Prizmistic is always exploring new things. Currently, we're focused on AI.",
       suggestions: ["Tell me about the workshop", "What is AI?"],
     };
   }
 
-  if (/prizia|who (is|are) you|about you|your purpose/.test(msg)) {
+  if (/prizia|who (is|are) you|about you|your purpose|why (were|are) you (made|built|created)/.test(msg)) {
     return {
       mode: "DIRECT",
-      text: `I'm Prizia — the conversational intelligence of ${prizmistic.name}. ${prizmistic.description} I know what's happening here and can explore the subjects we're currently learning and creating.`,
-      suggestions: ["What are you exploring?", "Tell me about Prizmistic"],
+      text: `I'm Prizia — the conversational intelligence of Prizmistic. ${prizmistic.description} I know what's happening here and can explore the subjects we're currently learning, teaching, and creating. My capability can be broad, but my purpose is narrow — I'm here specifically for Prizmistic.`,
+      suggestions: ["What are you exploring?", "Tell me more about Prizmistic"],
+    };
+  }
+
+  if (/what (kind|type) of (place|space|community)|what is prizmistic|describe|explain|about prizmistic/.test(msg)) {
+    return {
+      mode: "DIRECT",
+      text: `${prizmistic.name} is ${prizmistic.description} It's not just a classroom, coworking space, or event venue — it's an environment where people can come with curiosity and find opportunities to learn something, make something, experiment with ideas, attend workshops, and meet interesting people. The subjects and experiences evolve over time.`,
+      suggestions: ["What's happening now?", "Explore AI"],
+    };
+  }
+
+  if (/who started|who runs|founder|owner|who (is )?behind/.test(msg)) {
+    return {
+      mode: "UNKNOWN",
+      text: "I don't have specific information about that right now. What I can tell you is what Prizmistic is and what we're exploring. Want to know more?",
+      suggestions: ["What is Prizmistic?", "What are you exploring?"],
     };
   }
 
   return {
     mode: "DIRECT",
-    text: `${prizmistic.name} is ${prizmistic.description} We're currently focused on exploring AI — learning how to use it, build with it, and understand what it means for creativity and work.`,
+    text: `${prizmistic.name} is ${prizmistic.description} We're currently focused on exploring AI — learning how to use it, build with it, and understand what it means for creativity and work. But that's just the beginning.`,
     suggestions: ["Explore AI", "What's the AI workshop?"],
   };
 }
 
 function isOutOfScope(msg: string): boolean {
   const outOfScope = [
-    /capital of|population of|weather|stock|price|recipe|horoscope|sports|score|game|movie|song|music|politic|election|religion|dating|love life|relationship advice|medical|health advice|legal advice|investment|cryptocurrency|bitcoin|travel|flights|hotel|restaurant|recipe|how to cook|weather forecast|lottery|winner|football|soccer|basketball|cricket|tennis|nba|nfl|fifa|olympics|world cup|election|president|prime minister|ceo|elon|trump|biden|musk|openai|google|apple|tesla|meta|amazon|microsoft|chatgpt|gemini|claude|gpt|llama|mistral|anthropic/,
+    /capital of|population of|weather (in|today|tomorrow)|stock (price|market)|share price|recipe|horoscope|sports (score|result|match)|game result|movie (review|rating|release)|song (by|lyrics)|music recommendation|politic|election|religion|dating advice|love life|relationship advice|medical (advice|diagnosis)|health advice|legal advice|investment advice|cryptocurrency|bitcoin price|travel (booking|flights|hotel|deal)|restaurant (near|recommend)|recipe for|weather forecast|lottery (result|winner|number)|football (match|result|score)|soccer|basketball|cricket (match|score)|tennis|nba|nfl|fifa|world cup|olympics|president|prime minister|ceo of|elon musk|trump|biden|openai (stock|valuation)|google (stock|finance)|apple (stock|finance)|tesla (stock)|meta (stock)|amazon (stock)|microsoft (stock)/
   ];
   return outOfScope.some((re) => re.test(msg));
 }
 
 function isUnknownPrizmistic(msg: string): boolean {
-  return /photography|gym|pool|sauna|parking|garage|upstairs|downstairs|basement|roof|garden|pet|animal|room\d|floor\s*\d|number of (people|students|members)|capacity|price|cost|membership|fee|staff|teacher|instructor name|owner|founder|who runs|who started/.test(msg) &&
+  return /photography (studio|equipment)|gym|pool|sauna|parking|garage|upstairs|downstairs|basement|roof|garden|pet friendly|animal|room\s*\d|floor\s*\d|number of (people|students|members)|capacity|price|cost|membership|fee|staff|teacher name|instructor name|owner name|founder name|who runs|who started|address|location|where (are|is) you|how (far|do i get|to get)/.test(msg) &&
     !/prizia|prizmistic|workshop|ai|art|clay|create|learn|explore|making/.test(msg);
 }
 
@@ -136,11 +161,11 @@ function findAIResponse(msg: string): PriziaResponse | null {
     }
   }
 
-  // Partial match
-  if (/ai|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|code|program|python|api|agent|chatbot|llm|nlp/.test(msg)) {
+  // Partial match for AI-related queries
+  if (/ai|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(msg)) {
     return {
       mode: "TEACH",
-      text: "That's a great question about AI. AI is a broad field — could you be more specific about what you'd like to explore? I can help with topics like AI agents, generative AI, prompting, or how AI is being used at Prizmistic.",
+      text: "That's a great question about AI. AI is a broad field — could you be more specific about what you'd like to explore? I can help with topics like AI agents, generative AI, prompting, machine learning, or how AI is being used at Prizmistic.",
       suggestions: [
         "What is an AI agent?",
         "What is generative AI?",
@@ -156,7 +181,8 @@ function findAIResponse(msg: string): PriziaResponse | null {
 function handleFollowUp(msg: string, lastAssistant: Message): PriziaResponse | null {
   const lastText = lastAssistant.content.toLowerCase();
 
-  if (/example|show me|demonstrate/.test(msg) && lastAssistant.suggestions?.includes("Show me an example")) {
+  // Context: after explaining AI agents
+  if (/example|show me|demonstrate|how does.*work in practice|give me.*example/.test(msg) && lastText.includes("agent")) {
     return {
       mode: "TEACH",
       text: `Here's a simple example of an AI agent in action:
@@ -171,7 +197,9 @@ An agent would:
 4. Rank by reviews
 5. Book a table if you want
 
-The key difference: an agent takes actions toward completing a goal, not just answering a question.`,
+The key difference: an agent takes actions toward completing a goal, not just answering a question.
+
+At Prizmistic, we're exploring how to build and use these kinds of systems.`,
       suggestions: [
         "How are agents different from chatbots?",
         "Can I build one?",
@@ -179,7 +207,7 @@ The key difference: an agent takes actions toward completing a goal, not just an
     };
   }
 
-  if (/different|vs|versus|compared|chatbot/.test(msg) && (lastAssistant.suggestions?.includes("How are agents different from chatbots?") || lastText.includes("agent"))) {
+  if (/different|vs|versus|compared|chatbot/.test(msg) && lastText.includes("agent")) {
     return {
       mode: "TEACH",
       text: `Here's the key distinction:
@@ -197,11 +225,12 @@ AI Agent:
 • Makes decisions about what to do next
 • Learns from feedback within a session
 
-Think of it this way: a chatbot is like someone who only answers questions. An agent is like someone who can actually do things for you.`,
+Think of it this way: a chatbot is like someone who only answers questions. An agent is like someone who can actually do things for you.
+
+We explore this distinction in the AI workshop.`,
       suggestions: [
         "How do I build an agent?",
-        "What tools do agents use?",
-        "Tell me more about AI",
+        "Tell me about the workshop",
       ],
     };
   }
@@ -226,10 +255,10 @@ At Prizmistic, we're exploring exactly this kind of hands-on AI building.`,
     };
   }
 
-  if (/included|what do|what will|workshop/.test(msg)) {
+  if (/included|what do|what will|workshop content|curriculum/.test(msg)) {
     return {
       mode: "DIRECT",
-      text: "The AI Workshop covers practical AI skills — from understanding what AI actually is, to writing effective prompts, to using AI tools for learning, research, creativity, and work. You'll get hands-on experience, not just theory.",
+      text: "The AI Workshop covers practical AI skills — from understanding what AI actually is, to writing effective prompts, to using AI tools for learning, research, creativity, and work. You'll get hands-on experience, not just theory. We explore AI fundamentals, generative AI, prompting, AI tools, and practical applications.",
       suggestions: [
         "Who is it for?",
         "What can I actually do with AI?",
@@ -237,10 +266,10 @@ At Prizmistic, we're exploring exactly this kind of hands-on AI building.`,
     };
   }
 
-  if (/who|target|beginner|advanced|for whom|newbie/.test(msg)) {
+  if (/who|target|beginner|advanced|for whom|newbie|level|experience needed/.test(msg)) {
     return {
       mode: "DIRECT",
-      text: "The workshop is designed for anyone curious about AI — whether you're a complete beginner or someone who's been using AI tools and wants to go deeper. The focus is on practical skills you can actually use.",
+      text: "The workshop is designed for anyone curious about AI — whether you're a complete beginner or someone who's been using AI tools and wants to go deeper. The focus is on practical skills you can actually use. No prior technical experience needed.",
       suggestions: [
         "What can I actually do with AI?",
         "Tell me more about the workshop",
@@ -248,7 +277,7 @@ At Prizmistic, we're exploring exactly this kind of hands-on AI building.`,
     };
   }
 
-  if (/do with|practical|real|actual|use ai/.test(msg)) {
+  if (/do with|practical|real|actual|use ai|what can i/.test(msg)) {
     return {
       mode: "TEACH",
       text: `Here are practical ways you can use AI today:
@@ -259,7 +288,7 @@ Learning:
 • Translate languages instantly
 
 Creativity:
-• Generate ideas andbrainstorm
+• Brainstorm ideas
 • Create images from descriptions
 • Write and edit text
 • Generate code and scripts
@@ -273,11 +302,42 @@ Work:
 • Automate repetitive tasks
 • Draft emails and documents
 • Analyze information faster
-• Build simple tools without coding expertise`,
+• Build simple tools without coding expertise
+
+At Prizmistic, we explore all of these in practice.`,
       suggestions: [
         "Tell me about the workshop",
         "What is an AI agent?",
       ],
+    };
+  }
+
+  if (/what (is|are) (ai|artificial intelligence)|explain ai|tell me about ai|basics of ai|ai basics|ai fundamentals/.test(msg)) {
+    return {
+      mode: "TEACH",
+      text: `Artificial Intelligence is the broad field of making machines do things that would normally require human intelligence — understanding language, recognizing images, making decisions, generating content.
+
+Within AI, there are many subfields:
+
+• Machine Learning — systems that learn from data
+• Deep Learning — neural networks with many layers
+• Generative AI — systems that create text, images, code, and more
+• Natural Language Processing — understanding and generating human language
+
+Prizmistic is currently exploring AI in a practical, hands-on way — not just theory, but how to actually use these tools.`,
+      suggestions: [
+        "What is generative AI?",
+        "What's the AI workshop about?",
+        "How can I use AI?",
+      ],
+    };
+  }
+
+  if (/what (is|are) (you|prizia) (exploring|learning|teaching|doing)|current(ly)? (exploring|focus|subject)/.test(msg)) {
+    return {
+      mode: "DIRECT",
+      text: "Currently, Prizmistic is exploring Artificial Intelligence — understanding it, using it, building with it, and figuring out how it can help with learning, creativity, and work. We're starting with AI but the plan is to explore other subjects too — like clay, photography, design, and more.",
+      suggestions: ["Tell me about AI", "What's the workshop?"],
     };
   }
 
