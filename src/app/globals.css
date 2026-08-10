@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --color-prizia-bg: #F7F7F9;
+  --color-prizia-white: #FFFFFF;
+  --color-prizia-ink: #0E0E13;
+  --color-prizia-secondary: #33333D;
+  --color-prizia-muted: #6B6B78;
+  --color-prizia-border: #D1D1D6;
+  --color-prizia-surface: #F5F5F7;
+  --color-prizia-violet: #6E47EB;
+  --color-prizia-cyan: #29B8DB;
+  --color-prizia-magenta: #E84DA8;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --- Keyframe Animations --- */
+
+@keyframes prizia-idle {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.03) translateY(-2px); }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes prizia-listen {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes prizia-think {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.04) rotate(2deg); }
+  75% { transform: scale(0.97) rotate(-2deg); }
+}
+
+@keyframes prizia-respond {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.06); }
+  60% { transform: scale(0.98); }
+}
+
+@keyframes prizia-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Utility Classes --- */
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out both;
+}
+
+.animate-prizia-idle {
+  animation: prizia-idle 4s ease-in-out infinite;
+}
+
+.animate-prizia-listen {
+  animation: prizia-listen 2.5s ease-in-out infinite;
+}
+
+.animate-prizia-think {
+  animation: prizia-think 1.8s ease-in-out infinite;
+}
+
+.animate-prizia-respond {
+  animation: prizia-respond 1.2s ease-in-out infinite;
+}
+
+/* --- Base --- */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #F7F7F9;
+  color: #0E0E13;
+}
+
+/* --- Focus Visible --- */
+
+:focus-visible {
+  outline: 2px solid #6E47EB;
+  outline-offset: 2px;
+}
+
+/* --- Scrollbar --- */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D1D6;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6B6B78;
+}
+
+/* --- Reduced Motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
