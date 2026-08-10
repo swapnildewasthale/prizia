@@ -65,7 +65,7 @@ export default function PriziaShell() {
         value={message}
         onChange={(event) => setMessage(event.target.value)}
         placeholder="Ask Prizia anything about what we’re exploring..."
-        className="min-w-0 flex-1 bg-transparent px-4 py-3 text-base font-medium text-[#fff2dc] placeholder:text-[#817c80] focus:outline-none sm:px-5"
+        className="prizia-input min-w-0 flex-1 bg-transparent px-4 py-3 text-base font-medium text-[#fff2dc] placeholder:text-[#817c80] focus:outline-none sm:px-5"
       />
       <button
         type="submit"
@@ -135,7 +135,7 @@ export default function PriziaShell() {
             {messages.map((chatMessage) => (
               <article
                 key={chatMessage.id}
-                className={chatMessage.role === "user" ? "self-end max-w-[82%] rounded-2xl rounded-br-md bg-[#e9a73a] px-5 py-3 text-[#21170c]" : "max-w-[88%] rounded-2xl rounded-bl-md border border-[#343238] bg-[#202023] px-5 py-4 text-[#fff2dc]"}
+                className={chatMessage.role === "user" ? "self-end max-w-[76%] rounded-2xl rounded-br-sm bg-[#FFF2DB] px-5 py-3.5 text-[#000000] shadow-[0_8px_22px_rgba(0,0,0,0.14)]" : "max-w-[82%] rounded-2xl rounded-bl-sm border border-[#343238] bg-[#202023] px-5 py-4 text-[#fff2dc] shadow-[0_8px_22px_rgba(0,0,0,0.12)]"}
               >
                 <p className="text-sm font-medium leading-relaxed sm:text-base">{chatMessage.content}</p>
               </article>
