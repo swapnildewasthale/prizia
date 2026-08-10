@@ -84,9 +84,15 @@ body {
 
 /* --- Focus Visible --- */
 
-:focus-visible {
+:focus-visible:not(.prizia-input) {
   outline: 2px solid #FFAD0D;
   outline-offset: 2px;
+}
+
+.prizia-input:focus,
+.prizia-input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 /* --- Scrollbar --- */
