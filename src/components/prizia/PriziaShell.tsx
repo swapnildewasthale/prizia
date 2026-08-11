@@ -4,6 +4,7 @@ import Image from "next/image";
 import { FormEvent, useState } from "react";
 import { getPriziaResponse } from "@/lib/prizia/mockResponses";
 import { Domain, Message } from "@/lib/prizia/types";
+import NavBar from "./NavBar";
 
 const domains: Domain[] = [
   { id: "ai", name: "AI", active: true },
@@ -82,28 +83,13 @@ export default function PriziaShell() {
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#101015] font-[family-name:var(--font-comfortaa)] text-[#fff5e3]">
-      <header className="flex items-center justify-between px-6 py-8 sm:px-12 sm:py-12">
-        <button
-          aria-label="Open menu"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffad0d]"
-        >
-          <span className="flex w-6 flex-col gap-1">
-            <span className="h-0.5 w-6 rounded-full bg-[#e9e9e9]" />
-            <span className="h-0.5 w-6 rounded-full bg-[#e9e9e9]" />
-            <span className="h-0.5 w-6 rounded-full bg-[#e9e9e9]" />
-          </span>
-        </button>
-        <p className="hidden items-center gap-4 text-sm font-normal tracking-wide sm:flex">
-          <span className="text-[#66636a]">Currently exploring</span>
-          <span className="font-medium text-[#f8eedc]">AI · Photography · Music</span>
-        </p>
-      </header>
+      <NavBar />
 
       {messages.length === 0 ? (
-        <main className="flex min-h-[calc(100vh-112px)] items-center justify-center px-5 pb-24 sm:px-10">
+        <main className="flex min-h-[calc(100vh-112px)] items-center justify-center px-5 pb-24 pt-28 sm:px-10">
           <section className="flex w-full max-w-3xl flex-col items-center text-center">
             <div aria-hidden="true" className="mb-5 flex h-28 items-center justify-center sm:mb-7">
-              <Image src="/prizia-icon-light.png" alt="" width={112} height={112} priority className="h-28 w-28 object-contain" />
+              <Image src="/Prizia icon light.png" alt="" width={112} height={112} priority className="h-28 w-28 object-contain" />
             </div>
             <h1 className="font-[family-name:var(--font-audiowide)] text-3xl font-normal tracking-[-0.055em] text-[#fff2dc] sm:text-5xl">
               Hi, I’m Prizia.
