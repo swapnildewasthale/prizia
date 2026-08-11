@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/domains", label: "Domains" },
-  { href: "/about", label: "About" },
-];
+import { site } from "@/content/prizmistic/site";
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,18 +11,13 @@ export default function NavBar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#101015]/90 backdrop-blur-md border-b border-white/5">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-12">
         <Link href="/" className="flex items-center gap-3">
-          <img
-            src="/Prizia icon light.png"
-            alt="Prizia logo"
-            className="w-8 h-8 object-contain"
-          />
           <span className="font-[family-name:var(--font-audiowide)] text-lg font-normal text-[#fff2dc] tracking-tight">
-            PRIZIA
+            PRIZMISTIC
           </span>
         </Link>
 
         <div className="hidden items-center gap-8 sm:flex">
-          {navLinks.map((link) => (
+          {site.nav.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -53,7 +43,7 @@ export default function NavBar() {
 
       {isMenuOpen && (
         <div className="border-t border-white/5 px-6 py-4 sm:hidden">
-          {navLinks.map((link) => (
+          {site.nav.map((link) => (
             <Link
               key={link.href}
               href={link.href}

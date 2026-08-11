@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
 import { getPriziaResponse } from "@/lib/prizia/mockResponses";
 import { Domain, Message } from "@/lib/prizia/types";
 import NavBar from "./NavBar";
@@ -12,12 +13,45 @@ const domains: Domain[] = [
   { id: "music", name: "Music", active: true },
 ];
 
-const prompts = ["Explore AI", "What’s happening here?", "Tell me about Prizmistic"];
+const prompts = ["Explore AI", "What's happening here?", "Tell me about Prizmistic"];
+
+function getInitialMessages(searchParams: ReturnType<typeof useSearchParams>): Message[] {
+  const q = searchParams.get("q");
+  if (!q?.trim()) return [];
+  return [
+    {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: q.trim(),
+    },
+  ];
+}
 
 export default function PriziaShell() {
+  const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isThinking, setIsThinking] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(searchParams));
+  const [isThinking, setIsThinking] = useState(() => !!searchParams.get("q")?.trim());
+
+  useEffect(() => {
+    if (messages.length !== 1 || messages[0].role !== "user" || isThinking === false) return;
+    const text = messages[0].content;
+    const timeout = window.setTimeout(() => {
+      const response = getPriziaResponse(text, [], domains);
+      setMessages((prev) => [
+        prev[0],
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: response.text,
+          mode: response.mode,
+        },
+      ]);
+      setIsThinking(false);
+    }, 700);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sendMessage = (text: string) => {
     const value = text.trim();
@@ -65,7 +99,7 @@ export default function PriziaShell() {
         id="prizia-message"
         value={message}
         onChange={(event) => setMessage(event.target.value)}
-        placeholder="Ask Prizia anything about what we’re exploring..."
+        placeholder="Ask Prizia anything about what we're exploring..."
         className="prizia-input min-w-0 flex-1 bg-transparent px-4 py-3 text-base font-medium text-[#fff2dc] placeholder:text-[#817c80] focus:outline-none sm:px-5"
       />
       <button
@@ -92,10 +126,10 @@ export default function PriziaShell() {
               <Image src="/Prizia icon light.png" alt="" width={112} height={112} priority className="h-28 w-28 object-contain" />
             </div>
             <h1 className="font-[family-name:var(--font-audiowide)] text-3xl font-normal tracking-[-0.055em] text-[#fff2dc] sm:text-5xl">
-              Hi, I’m Prizia.
+              Hi, I&apos;m Prizia.
             </h1>
             <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-[#fbf1df] sm:text-2xl">
-              I know what’s happening at Prizmistic.
+              I know what&apos;s happening at Prizmistic.
               <br />
               What are you curious about?
             </p>

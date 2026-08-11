@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Audiowide, Comfortaa } from "next/font/google";
+import Footer from "@/components/prizia/Footer";
 import "./globals.css";
 
 const audiowide = Audiowide({
@@ -17,9 +18,9 @@ const comfortaa = Comfortaa({
 });
 
 export const metadata: Metadata = {
-  title: "Prizia — The Intelligence of Prizmistic",
+  title: "Prizmistic — Learn, Make, Explore",
   description:
-    "Prizia is the conversational intelligence of Prizmistic. She knows what is happening at Prizmistic and can deeply explore the subjects that Prizmistic is currently learning, teaching, making, or organizing.",
+    "Prizmistic ek aisi jagah hai jahan aap kuch seekh sakte hain, kuch bana sakte hain, ya bas kisi idea ko explore kar sakte hain.",
 };
 
 export default function RootLayout({
@@ -28,9 +29,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="hi">
       <body className={`${audiowide.variable} ${comfortaa.variable} font-sans antialiased`}>
         {children}
+        <Footer />
       </body>
     </html>
   );
