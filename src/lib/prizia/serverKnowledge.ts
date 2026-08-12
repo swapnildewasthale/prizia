@@ -6,14 +6,28 @@ let cachedContent: string | null = null;
 function loadPriziaMd(): string {
   if (cachedContent) return cachedContent;
 
-  try {
-    const filePath = path.join(process.cwd(), "public", "prizia.md");
-    cachedContent = fs.readFileSync(filePath, "utf-8");
-  } catch (err) {
-    console.error("[serverKnowledge] Failed to read prizia.md:", err);
-    cachedContent = "";
+  // Try multiple paths for Vercel compatibility
+  const possiblePaths = [
+    path.join(process.cwd(), "public", "prizia.md"),
+    path.join(process.cwd(), "prizia.md"),
+    path.join("/var/task/public", "prizia.md"),
+  ];
+
+  for (const filePath of possiblePaths) {
+    try {
+      if (fs.existsSync(filePath)) {
+        cachedContent = fs.readFileSync(filePath, "utf-8");
+        console.log(`[serverKnowledge] Loaded prizia.md from: ${filePath} (${cachedContent.length} chars)`);
+        return cachedContent ?? "";
+      }
+    } catch (err) {
+      // Try next path
+    }
   }
-  return cachedContent ?? "";
+
+  console.error("[serverKnowledge] Could not find prizia.md in any expected location");
+  cachedContent = "";
+  return "";
 }
 
 interface Section {

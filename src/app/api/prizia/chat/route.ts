@@ -46,6 +46,11 @@ export async function POST(request: NextRequest) {
 
     console.error("[Prizia API] Error:", message, "| name:", name, "| status:", status, "| statusText:", statusText);
 
+    // Log full error object for debugging (excluding sensitive data)
+    if (error instanceof Error && error.cause) {
+      console.error("[Prizia API] Cause:", String(error.cause));
+    }
+
     if (message.includes("GEMINI_API_KEY") || !process.env.GEMINI_API_KEY) {
       return NextResponse.json(
         { mode: "CHAT", text: "I'm not configured properly yet. Please check the GEMINI_API_KEY environment variable.", suggestions: [] },
@@ -53,8 +58,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Return the actual error message in development for debugging
+    const isDev = process.env.NODE_ENV === "development";
+    const userMessage = isDev
+      ? `Something went wrong: ${message}`
+      : "Something went wrong while I was thinking. Try asking me again.";
+
     return NextResponse.json(
-      { mode: "CHAT", text: "Something went wrong while I was thinking. Try asking me again.", suggestions: [] },
+      { mode: "CHAT", text: userMessage, suggestions: [] },
       { status: 500 }
     );
   }

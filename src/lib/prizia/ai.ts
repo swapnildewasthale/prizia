@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { Message, PriziaResponse } from "./types";
 import { getPriziaSystemInstruction } from "./serverKnowledge";
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
 let aiClient: GoogleGenAI | null = null;
 
@@ -46,21 +46,56 @@ export async function generatePriziaResponse(
   const systemInstruction = getPriziaSystemInstruction();
   const contents = buildContents(message, conversationHistory);
 
-  const response = await client.models.generateContent({
-    model: GEMINI_MODEL,
-    contents,
-    config: {
-      systemInstruction,
-      temperature: 0.7,
-      maxOutputTokens: 1024,
-    },
-  });
+  console.log(`[Prizia AI] Model: ${GEMINI_MODEL}`);
+  console.log(`[Prizia AI] System instruction: ${systemInstruction.length} chars`);
+  console.log(`[Prizia AI] Conversation turns: ${contents.length}`);
 
-  const text = response.text ?? "";
+  try {
+    const response = await client.models.generateContent({
+      model: GEMINI_MODEL,
+      contents,
+      config: {
+        systemInstruction,
+        temperature: 0.7,
+        maxOutputTokens: 1024,
+      },
+    });
 
-  return {
-    mode: "CHAT",
-    text: text || "I'm not sure how to respond to that. Could you try rephrasing?",
-    suggestions: [],
-  };
+    const text = response.text ?? "";
+    console.log(`[Prizia AI] Response length: ${text.length} chars`);
+
+    return {
+      mode: "CHAT",
+      text: text || "I'm not sure how to respond to that. Could you try rephrasing?",
+      suggestions: [],
+    };
+  } catch (err) {
+    console.error("[Prizia AI] Gemini error:", err);
+
+    // If the model fails, try a fallback model
+    if (GEMINI_MODEL !== "gemini-2.0-flash") {
+      console.log("[Prizia AI] Retrying with gemini-2.0-flash...");
+      try {
+        const fallbackResponse = await client.models.generateContent({
+          model: "gemini-2.0-flash",
+          contents,
+          config: {
+            systemInstruction,
+            temperature: 0.7,
+            maxOutputTokens: 1024,
+          },
+        });
+        const fallbackText = fallbackResponse.text ?? "";
+        return {
+          mode: "CHAT",
+          text: fallbackText || "I'm not sure how to respond to that. Could you try rephrasing?",
+          suggestions: [],
+        };
+      } catch (fallbackErr) {
+        console.error("[Prizia AI] Fallback also failed:", fallbackErr);
+      }
+    }
+
+    throw err;
+  }
 }
