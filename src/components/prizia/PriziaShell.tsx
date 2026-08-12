@@ -2,16 +2,9 @@
 
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
-import { getPriziaResponse } from "@/lib/prizia/mockResponses";
-import { Domain, Message } from "@/lib/prizia/types";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { Message, PriziaResponse } from "@/lib/prizia/types";
 import NavBar from "./NavBar";
-
-const domains: Domain[] = [
-  { id: "ai", name: "AI", active: true },
-  { id: "photography", name: "Photography", active: true },
-  { id: "music", name: "Music", active: true },
-];
 
 const prompts = ["Explore AI", "What's happening here?", "Tell me about Prizmistic"];
 
@@ -27,17 +20,45 @@ function getInitialMessages(searchParams: ReturnType<typeof useSearchParams>): M
   ];
 }
 
+async function fetchPriziaResponse(
+  message: string,
+  conversationHistory: Message[]
+): Promise<PriziaResponse> {
+  const res = await fetch("/api/prizia/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, conversationHistory }),
+  });
+
+  if (!res.ok) {
+    return {
+      mode: "CHAT",
+      text: "Something went wrong while I was thinking. Try asking me again.",
+      suggestions: [],
+    };
+  }
+
+  return res.json();
+}
+
 export default function PriziaShell() {
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(searchParams));
   const [isThinking, setIsThinking] = useState(() => !!searchParams.get("q")?.trim());
+  const historyRef = useRef<Message[]>([]);
+
+  useEffect(() => {
+    historyRef.current = messages;
+  }, [messages]);
 
   useEffect(() => {
     if (messages.length !== 1 || messages[0].role !== "user" || isThinking === false) return;
     const text = messages[0].content;
-    const timeout = window.setTimeout(() => {
-      const response = getPriziaResponse(text, [], domains);
+
+    let cancelled = false;
+    fetchPriziaResponse(text, []).then((response) => {
+      if (cancelled) return;
       setMessages((prev) => [
         prev[0],
         {
@@ -48,27 +69,28 @@ export default function PriziaShell() {
         },
       ]);
       setIsThinking(false);
-    }, 700);
-    return () => clearTimeout(timeout);
+    });
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const sendMessage = (text: string) => {
-    const value = text.trim();
-    if (!value || isThinking) return;
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const value = text.trim();
+      if (!value || isThinking) return;
 
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: value,
-    };
+      const userMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: value,
+      };
 
-    setMessages((currentMessages) => [...currentMessages, userMessage]);
-    setMessage("");
-    setIsThinking(true);
+      setMessages((currentMessages) => [...currentMessages, userMessage]);
+      setMessage("");
+      setIsThinking(true);
 
-    window.setTimeout(() => {
-      const response = getPriziaResponse(value, messages, domains);
+      const response = await fetchPriziaResponse(value, historyRef.current);
+
       setMessages((currentMessages) => [
         ...currentMessages,
         {
@@ -79,8 +101,9 @@ export default function PriziaShell() {
         },
       ]);
       setIsThinking(false);
-    }, 700);
-  };
+    },
+    [isThinking]
+  );
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
