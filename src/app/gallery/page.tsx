@@ -27,7 +27,6 @@ export default function GalleryPage() {
           </Link>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

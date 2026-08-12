@@ -27,7 +27,6 @@ export default function AboutPage() {
           </Link>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

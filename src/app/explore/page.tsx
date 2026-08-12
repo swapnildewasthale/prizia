@@ -27,7 +27,6 @@ export default function ExplorePage() {
           </Link>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }
