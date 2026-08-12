@@ -32,15 +32,24 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
+    const raw =
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : JSON.stringify(error);
+    const errorMessage = raw ?? "Unknown error";
     console.error("[Prizia API Error]", errorMessage);
+    console.error("[Prizia API Error] env check:", {
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY ? "SET (redacted)" : "MISSING",
+      GEMINI_MODEL: process.env.GEMINI_MODEL || "(using default)",
+    });
 
-    if (errorMessage.includes("GEMINI_API_KEY")) {
+    if (errorMessage.includes("GEMINI_API_KEY") || !process.env.GEMINI_API_KEY) {
       return NextResponse.json(
         {
           mode: "CHAT",
-          text: "I'm not configured properly yet. Please check the environment setup.",
+          text: "I'm not configured properly yet. The GEMINI_API_KEY environment variable is missing. Please add it to your Vercel project settings.",
           suggestions: [],
         },
         { status: 500 }

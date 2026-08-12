@@ -6,9 +6,14 @@ let cachedContent: string | null = null;
 function loadPriziaMd(): string {
   if (cachedContent) return cachedContent;
 
-  const filePath = path.join(process.cwd(), "public", "prizia.md");
-  cachedContent = fs.readFileSync(filePath, "utf-8");
-  return cachedContent;
+  try {
+    const filePath = path.join(process.cwd(), "public", "prizia.md");
+    cachedContent = fs.readFileSync(filePath, "utf-8");
+  } catch (err) {
+    console.error("[serverKnowledge] Failed to read prizia.md:", err);
+    cachedContent = "";
+  }
+  return cachedContent ?? "";
 }
 
 interface Section {
