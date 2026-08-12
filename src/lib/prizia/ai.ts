@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { Message, PriziaResponse } from "./types";
 import { getPriziaSystemInstruction } from "./serverKnowledge";
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
 let aiClient: GoogleGenAI | null = null;
 
