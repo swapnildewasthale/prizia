@@ -3,16 +3,12 @@
 @theme {
   --font-sans: var(--font-comfortaa), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --color-prizia-bg: #101015;
+  --color-prizia-bg: #000000;
   --color-prizia-white: #FFFFFF;
-  --color-prizia-ink: #FFF2DC;
-  --color-prizia-secondary: #33333D;
-  --color-prizia-muted: #6B6B78;
-  --color-prizia-border: #D1D1D6;
-  --color-prizia-surface: #F5F5F7;
-  --color-prizia-violet: #6E47EB;
-  --color-prizia-cyan: #29B8DB;
-  --color-prizia-magenta: #E84DA8;
+  --color-prizia-ink: #FFF2DB;
+  --color-prizia-orange: #F5A623;
+  --color-prizia-violet: #8B6CFF;
+  --color-prizia-cyan: #4DD9D0;
 }
 
 /* --- Keyframe Animations --- */
@@ -78,14 +74,14 @@ html {
 }
 
 body {
-  background-color: #101015;
-  color: #FFF2DC;
+  background-color: #000000;
+  color: #FFF2DB;
 }
 
 /* --- Focus Visible --- */
 
 :focus-visible:not(.prizia-input) {
-  outline: 2px solid #FFAD0D;
+  outline: 2px solid #F5A623;
   outline-offset: 2px;
 }
 
@@ -106,12 +102,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D1D1D6;
+  background: rgba(255, 242, 219, 0.2);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6B6B78;
+  background: rgba(255, 242, 219, 0.35);
 }
 
 /* --- Reduced Motion --- */

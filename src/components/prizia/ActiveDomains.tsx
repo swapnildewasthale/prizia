@@ -11,10 +11,10 @@ export default function ActiveDomains({ domains, compact = false }: ActiveDomain
 
   return (
     <div className={`flex items-center gap-1.5 ${compact ? "" : ""}`}>
-      <span className={`${compact ? "text-xs" : "text-sm"} text-[#6B6B78]`}>
+      <span className={`${compact ? "text-xs" : "text-sm"} text-[#FFF2DB]/30`}>
         Currently exploring ·
       </span>
-      <span className={`${compact ? "text-xs" : "text-sm"} font-medium text-[#0E0E13]`}>
+      <span className={`${compact ? "text-xs" : "text-sm"} font-medium text-[#FFF2DB]/60`}>
         {active.map((d) => d.name).join(" · ")}
       </span>
     </div>

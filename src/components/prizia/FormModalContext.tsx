@@ -64,17 +64,17 @@ export function FormModalProvider({ children }: { children: React.ReactNode }) {
           />
 
           {/* Modal content */}
-          <div className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a24] shadow-2xl animate-fade-in sm:max-w-3xl">
+          <div className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-[#FFF2DB]/10 bg-[#0a0a0a] shadow-2xl animate-fade-in sm:max-w-3xl">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-white/5 px-5 py-4 sm:px-6">
-              <h3 className="font-[family-name:var(--font-audiowide)] text-sm font-normal text-[#fff2dc] sm:text-base">
+            <div className="flex items-center justify-between border-b border-[#FFF2DB]/5 px-5 py-4 sm:px-6">
+              <h3 className="font-[family-name:var(--font-audiowide)] text-sm font-normal text-[#FFF2DB] sm:text-base">
                 Prizmistic AI Experience
               </h3>
               <button
                 ref={triggerRef}
                 onClick={closeForm}
                 aria-label="Close registration form"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[#a49ba0] transition hover:bg-white/10 hover:text-[#fff2dc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffad0d]"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[#FFF2DB]/50 transition hover:bg-[#FFF2DB]/10 hover:text-[#FFF2DB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623]"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
                   <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />

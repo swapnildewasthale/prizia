@@ -9,19 +9,19 @@ export const metadata = {
 
 export default function GalleryPage() {
   return (
-    <div className="min-h-screen bg-[#101015] font-[family-name:var(--font-comfortaa)] text-[#fff5e3]">
+    <div className="min-h-screen bg-[#000000] font-[family-name:var(--font-comfortaa)] text-[#FFF2DB]">
       <NavBar />
       <main className="flex min-h-[calc(100vh-112px)] items-center justify-center px-5 pb-24 pt-28 sm:px-10">
         <section className="flex max-w-2xl flex-col items-center text-center">
-          <h1 className="font-[family-name:var(--font-audiowide)] text-3xl font-normal tracking-[-0.055em] text-[#fff2dc] sm:text-5xl">
+          <h1 className="font-[family-name:var(--font-audiowide)] text-3xl font-normal tracking-[-0.055em] text-[#FFF2DB] sm:text-5xl">
             Gallery
           </h1>
-          <p className="mt-6 text-lg text-[#a49ba0]">
+          <p className="mt-6 text-lg text-[#FFF2DB]/50">
             Ye page abhi ban raha hai.
           </p>
           <Link
             href="/"
-            className="mt-8 text-sm text-[#d5842d] transition hover:text-[#ffad0d]"
+            className="mt-8 text-sm text-[#F5A623] transition hover:text-[#F5A623]"
           >
             ← Wapas jao
           </Link>

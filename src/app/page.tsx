@@ -46,19 +46,19 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#101015] font-[family-name:var(--font-comfortaa)] text-[#fff5e3]">
+    <div className="min-h-screen overflow-hidden bg-[#000000] font-[family-name:var(--font-comfortaa)] text-[#FFF2DB]">
       <NavBar />
 
       {/* ── Hero ── */}
       <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden px-5 pt-20 sm:px-10">
         {/* subtle geometric accent */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-[#6E47EB]/[0.04] blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-[#29B8DB]/[0.03] blur-3xl" />
+          <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-[#8B6CFF]/[0.06] blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-[#4DD9D0]/[0.05] blur-3xl" />
         </div>
 
         <div className="relative z-10 flex max-w-4xl flex-col items-center text-center">
-          <h1 className="font-[family-name:var(--font-audiowide)] text-4xl font-normal leading-tight tracking-[-0.04em] text-[#fff2dc] sm:text-6xl sm:leading-tight">
+          <h1 className="font-[family-name:var(--font-audiowide)] text-4xl font-normal leading-tight tracking-[-0.04em] text-[#FFF2DB] sm:text-6xl sm:leading-tight">
             {home.hero.headline.split("\n").map((line, i) => (
               <span key={i}>
                 {line}
@@ -66,7 +66,7 @@ export default function Home() {
               </span>
             ))}
           </h1>
-          <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-[#fbf1df]/80 sm:text-xl">
+          <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-[#FFF2DB]/70 sm:text-xl">
             {home.hero.sub}
           </p>
         </div>
@@ -75,12 +75,12 @@ export default function Home() {
       {/* ── Prizia Entry ── */}
       <section className="relative px-5 py-20 sm:px-10">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <p className="mb-4 text-sm font-medium uppercase tracking-widest text-[#d5842d]">
+          <p className="mb-4 text-sm font-medium uppercase tracking-widest text-[#F5A623]">
             {home.priziaEntry.label}
           </p>
           <form
             onSubmit={handleSubmit}
-            className="flex w-full items-center rounded-[1.35rem] border border-[#e8e0d4]/20 bg-[#1a1a1f] p-1.5 shadow-[0_16px_45px_rgba(0,0,0,0.3)]"
+            className="flex w-full items-center rounded-[1.35rem] border border-[#FFF2DB]/10 bg-[#0a0a0a] p-1.5 shadow-[0_16px_45px_rgba(0,0,0,0.5)]"
           >
             <label htmlFor="prizia-home" className="sr-only">
               Ask Prizia a question
@@ -90,22 +90,22 @@ export default function Home() {
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               placeholder={home.priziaEntry.placeholder}
-              className="prizia-input min-w-0 flex-1 bg-transparent px-4 py-3 text-base font-medium text-[#fff2dc] placeholder:text-[#6b6b78] focus:outline-none sm:px-5"
+              className="prizia-input min-w-0 flex-1 bg-transparent px-4 py-3 text-base font-medium text-[#FFF2DB] placeholder:text-[#FFF2DB]/30 focus:outline-none sm:px-5"
             />
             <button
               type="submit"
               disabled={!message.trim()}
               aria-label="Send message"
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#ffd519] via-[#ffb411] to-[#f28e0c] transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#F5A623] via-[#F5A623] to-[#F5A623] transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
-              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-[#221b11]" aria-hidden="true">
+              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-[#000000]" aria-hidden="true">
                 <path d="M4.5 4.2 20 11.1a1 1 0 0 1 0 1.8L4.5 19.8l2.3-6.1a1 1 0 0 0 0-.7L4.5 4.2Zm3.3 3.2 1 3.1h6.3L7.8 7.4Zm0 9.2 7.3-3.1H8.8l-1 3.1Z" />
               </svg>
             </button>
           </form>
           <Link
             href="/prizia"
-            className="mt-4 text-sm text-[#6b6b78] transition hover:text-[#a49ba0]"
+            className="mt-4 text-sm text-[#FFF2DB]/30 transition hover:text-[#FFF2DB]/60"
           >
             Ya seedha Prizia se baat karo →
           </Link>
@@ -115,12 +115,12 @@ export default function Home() {
       {/* ── What is Prizmistic? ── */}
       <section className="px-5 py-20 sm:px-10">
         <div className="mx-auto max-w-3xl">
-          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#fff2dc] sm:text-3xl">
+          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
             {home.whatIs.heading}
           </h2>
           <div className="mt-8 space-y-5">
             {home.whatIs.paragraphs.map((p, i) => (
-              <p key={i} className="text-base leading-relaxed text-[#fbf1df]/70 sm:text-lg">
+              <p key={i} className="text-base leading-relaxed text-[#FFF2DB]/60 sm:text-lg">
                 {p}
               </p>
             ))}
@@ -137,15 +137,15 @@ export default function Home() {
           {home.values.map((v) => (
             <div
               key={v.title}
-              className="group rounded-2xl border border-white/5 bg-[#16161b] p-6 transition hover:border-[#d5842d]/20 hover:bg-[#1c1c22]"
+              className="group rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a] p-6 transition hover:border-[#F5A623]/20 hover:bg-[#111111]"
             >
-              <div className="mb-4 text-[#d5842d] transition group-hover:text-[#ffad0d]">
+              <div className="mb-4 text-[#F5A623] transition group-hover:text-[#F5A623]">
                 {valueIcons[v.icon]}
               </div>
-              <h3 className="font-[family-name:var(--font-audiowide)] text-base font-normal text-[#fff2dc]">
+              <h3 className="font-[family-name:var(--font-audiowide)] text-base font-normal text-[#FFF2DB]">
                 {v.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#a49ba0]">
+              <p className="mt-2 text-sm leading-relaxed text-[#FFF2DB]/50">
                 {v.description}
               </p>
             </div>
@@ -156,22 +156,22 @@ export default function Home() {
       {/* ── Currently Exploring ── */}
       <section className="px-5 py-20 sm:px-10">
         <div className="mx-auto max-w-3xl">
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#6b6b78]">
+          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#FFF2DB]/30">
             {home.currentlyExploring.heading}
           </p>
           {home.currentlyExploring.domains.map((d) => (
             <Link
               key={d.id}
               href={d.href}
-              className="group block rounded-2xl border border-white/5 bg-[#16161b] p-6 transition hover:border-[#d5842d]/20 hover:bg-[#1c1c22] sm:p-8"
+              className="group block rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a] p-6 transition hover:border-[#F5A623]/20 hover:bg-[#111111] sm:p-8"
             >
-              <h3 className="font-[family-name:var(--font-audiowide)] text-xl font-normal text-[#fff2dc] sm:text-2xl">
+              <h3 className="font-[family-name:var(--font-audiowide)] text-xl font-normal text-[#FFF2DB] sm:text-2xl">
                 {d.name}
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-[#a49ba0] sm:text-base">
+              <p className="mt-3 text-sm leading-relaxed text-[#FFF2DB]/50 sm:text-base">
                 {d.description}
               </p>
-              <span className="mt-4 inline-block text-sm font-medium text-[#d5842d] transition group-hover:text-[#ffad0d]">
+              <span className="mt-4 inline-block text-sm font-medium text-[#F5A623] transition group-hover:text-[#F5A623]">
                 Explore AI →
               </span>
             </Link>
@@ -182,10 +182,10 @@ export default function Home() {
       {/* ── Gallery Preview ── */}
       <section className="px-5 py-20 sm:px-10">
         <div className="mx-auto max-w-3xl">
-          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#fff2dc] sm:text-3xl">
+          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
             {home.galleryPreview.heading}
           </h2>
-          <p className="mt-4 max-w-xl text-base text-[#a49ba0] sm:text-lg">
+          <p className="mt-4 max-w-xl text-base text-[#FFF2DB]/50 sm:text-lg">
             {home.galleryPreview.description}
           </p>
 
@@ -194,14 +194,14 @@ export default function Home() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="aspect-[4/3] rounded-xl border border-white/5 bg-[#16161b] transition group-hover:border-white/10"
+                className="aspect-[4/3] rounded-xl border border-[#FFF2DB]/5 bg-[#0a0a0a] transition group-hover:border-[#FFF2DB]/10"
               />
             ))}
           </div>
 
           <Link
             href={home.galleryPreview.href}
-            className="mt-6 inline-block text-sm font-medium text-[#d5842d] transition hover:text-[#ffad0d]"
+            className="mt-6 inline-block text-sm font-medium text-[#F5A623] transition hover:text-[#F5A623]"
           >
             Gallery →
           </Link>
@@ -211,15 +211,15 @@ export default function Home() {
       {/* ── Prizia Invitation ── */}
       <section className="px-5 py-24 sm:px-10">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#fff2dc] sm:text-3xl">
+          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
             {home.priziaInvitation.heading}
           </h2>
-          <p className="mt-3 text-base text-[#a49ba0] sm:text-lg">
+          <p className="mt-3 text-base text-[#FFF2DB]/50 sm:text-lg">
             {home.priziaInvitation.sub}
           </p>
           <Link
             href="/prizia"
-            className="mt-8 inline-flex items-center gap-2 rounded-full border border-[#d5842d]/30 bg-[#d5842d]/10 px-6 py-3 text-sm font-medium text-[#d5842d] transition hover:bg-[#d5842d]/20 hover:text-[#ffad0d]"
+            className="mt-8 inline-flex items-center gap-2 rounded-full border border-[#F5A623]/30 bg-[#F5A623]/10 px-6 py-3 text-sm font-medium text-[#F5A623] transition hover:bg-[#F5A623]/20 hover:text-[#F5A623]"
           >
             Prizia se baat karo
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">

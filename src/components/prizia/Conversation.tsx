@@ -75,10 +75,10 @@ export default function Conversation({ domains }: ConversationProps) {
             alt="Prizia logo"
             className="w-20 h-20 md:w-24 md:h-24 object-contain"
           />
-          <h2 className="mt-8 text-3xl md:text-[40px] font-semibold text-[#0E0E13] tracking-tight">
+          <h2 className="mt-8 text-3xl md:text-[40px] font-semibold text-[#FFF2DB] tracking-tight">
             Hi, I&apos;m Prizia.
           </h2>
-          <p className="mt-3 text-base md:text-lg text-[#6B6B78] leading-relaxed">
+          <p className="mt-3 text-base md:text-lg text-[#FFF2DB]/50 leading-relaxed">
             I know what&apos;s happening at Prizmistic.
             <br />
             What are you curious about?
@@ -95,8 +95,8 @@ export default function Conversation({ domains }: ConversationProps) {
             <ConversationInput priziaState={priziaState} onSend={handleSend} />
           </div>
 
-          <p className="mt-6 text-xs text-[#6B6B78]">
-            Currently exploring · <span className="font-medium text-[#33333D]">AI</span>
+          <p className="mt-6 text-xs text-[#FFF2DB]/30">
+            Currently exploring · <span className="font-medium text-[#FFF2DB]/60">AI</span>
           </p>
         </div>
       </div>
@@ -122,11 +122,11 @@ export default function Conversation({ domains }: ConversationProps) {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-[#F7F7F9]/90 backdrop-blur-sm py-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#000000]/90 backdrop-blur-sm py-4">
         <ConversationInput priziaState={priziaState} onSend={handleSend} />
         <div className="text-center mt-2">
-          <p className="text-[11px] text-[#6B6B78]">
-            Currently exploring · <span className="font-medium text-[#33333D]">AI</span>
+          <p className="text-[11px] text-[#FFF2DB]/25">
+            Currently exploring · <span className="font-medium text-[#FFF2DB]/50">AI</span>
           </p>
         </div>
       </div>

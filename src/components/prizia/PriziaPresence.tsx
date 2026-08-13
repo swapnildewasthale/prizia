@@ -3,10 +3,10 @@
 import { PriziaState } from "@/lib/prizia/types";
 
 const stateColors: Record<PriziaState, { from: string; to: string; glow: string }> = {
-  idle: { from: "#c4b5fd", to: "#ddd6fe", glow: "rgba(139, 92, 246, 0.15)" },
-  listening: { from: "#a78bfa", to: "#c4b5fd", glow: "rgba(139, 92, 246, 0.3)" },
-  thinking: { from: "#7c3aed", to: "#a78bfa", glow: "rgba(139, 92, 246, 0.45)" },
-  responding: { from: "#8b5cf6", to: "#c4b5fd", glow: "rgba(139, 92, 246, 0.35)" },
+  idle: { from: "#8B6CFF", to: "#4DD9D0", glow: "rgba(139, 108, 255, 0.15)" },
+  listening: { from: "#8B6CFF", to: "#8B6CFF", glow: "rgba(139, 108, 255, 0.3)" },
+  thinking: { from: "#8B6CFF", to: "#F5A623", glow: "rgba(139, 108, 255, 0.45)" },
+  responding: { from: "#4DD9D0", to: "#8B6CFF", glow: "rgba(77, 217, 208, 0.35)" },
 };
 
 interface PriziaPresenceProps {

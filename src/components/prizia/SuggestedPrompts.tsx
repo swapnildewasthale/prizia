@@ -14,7 +14,7 @@ export default function SuggestedPrompts({ suggestions, onSelect }: SuggestedPro
         <button
           key={i}
           onClick={() => onSelect(s)}
-          className="px-4 py-2 text-sm text-[#33333D] bg-white border border-[#D1D1D6] rounded-full hover:border-[#6E47EB] hover:text-[#6E47EB] transition-colors duration-200 cursor-pointer"
+          className="px-4 py-2 text-sm text-[#FFF2DB]/60 bg-[#0d0d0d] border border-[#FFF2DB]/10 rounded-full hover:border-[#8B6CFF]/40 hover:text-[#8B6CFF] transition-colors duration-200 cursor-pointer"
         >
           {s}
         </button>
