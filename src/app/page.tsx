@@ -51,10 +51,11 @@ export default function Home() {
 
       {/* ── Hero ── */}
       <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden px-5 pt-20 sm:px-10">
-        {/* subtle geometric accent */}
+        {/* atmospheric glows */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-[#8B6CFF]/[0.06] blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-[#4DD9D0]/[0.05] blur-3xl" />
+          <div className="absolute -top-32 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-[#8B6CFF]/[0.08] blur-[120px]" />
+          <div className="absolute bottom-0 left-1/4 h-[400px] w-[500px] rounded-full bg-[#4DD9D0]/[0.06] blur-[100px]" />
+          <div className="absolute top-1/3 right-0 h-[300px] w-[300px] rounded-full bg-[#F5A623]/[0.04] blur-[80px]" />
         </div>
 
         <div className="relative z-10 flex max-w-4xl flex-col items-center text-center">
@@ -113,8 +114,12 @@ export default function Home() {
       </section>
 
       {/* ── What is Prizmistic? ── */}
-      <section className="px-5 py-20 sm:px-10">
-        <div className="mx-auto max-w-3xl">
+      <section className="relative px-5 py-20 sm:px-10">
+        {/* subtle violet atmosphere */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#8B6CFF]/[0.05] blur-[120px]" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-3xl">
           <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
             {home.whatIs.heading}
           </h2>
@@ -132,12 +137,17 @@ export default function Home() {
       <RegistrationSection />
 
       {/* ── Values: Learn / Make / Experiment / Explore ── */}
-      <section className="px-5 py-20 sm:px-10">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="relative px-5 py-20 sm:px-10">
+        {/* warm orange atmosphere */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 right-0 h-[400px] w-[500px] rounded-full bg-[#F5A623]/[0.04] blur-[100px]" />
+          <div className="absolute bottom-0 left-0 h-[300px] w-[400px] rounded-full bg-[#8B6CFF]/[0.03] blur-[80px]" />
+        </div>
+        <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {home.values.map((v) => (
             <div
               key={v.title}
-              className="group rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a] p-6 transition hover:border-[#F5A623]/20 hover:bg-[#111111]"
+              className="group rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a]/80 p-6 backdrop-blur-sm transition hover:border-[#F5A623]/20 hover:bg-[#111111]/80"
             >
               <div className="mb-4 text-[#F5A623] transition group-hover:text-[#F5A623]">
                 {valueIcons[v.icon]}
@@ -154,8 +164,13 @@ export default function Home() {
       </section>
 
       {/* ── Currently Exploring ── */}
-      <section className="px-5 py-20 sm:px-10">
-        <div className="mx-auto max-w-3xl">
+      <section className="relative px-5 py-20 sm:px-10">
+        {/* violet-to-cyan transition atmosphere */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/2 left-0 h-[500px] w-[600px] -translate-y-1/2 rounded-full bg-[#8B6CFF]/[0.06] blur-[120px]" />
+          <div className="absolute top-1/2 right-0 h-[400px] w-[500px] -translate-y-1/2 rounded-full bg-[#4DD9D0]/[0.05] blur-[100px]" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-3xl">
           <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#FFF2DB]/30">
             {home.currentlyExploring.heading}
           </p>
@@ -163,7 +178,7 @@ export default function Home() {
             <Link
               key={d.id}
               href={d.href}
-              className="group block rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a] p-6 transition hover:border-[#F5A623]/20 hover:bg-[#111111] sm:p-8"
+              className="group block rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a]/80 p-6 backdrop-blur-sm transition hover:border-[#4DD9D0]/20 hover:bg-[#111111]/80 sm:p-8"
             >
               <h3 className="font-[family-name:var(--font-audiowide)] text-xl font-normal text-[#FFF2DB] sm:text-2xl">
                 {d.name}
@@ -171,7 +186,7 @@ export default function Home() {
               <p className="mt-3 text-sm leading-relaxed text-[#FFF2DB]/50 sm:text-base">
                 {d.description}
               </p>
-              <span className="mt-4 inline-block text-sm font-medium text-[#F5A623] transition group-hover:text-[#F5A623]">
+              <span className="mt-4 inline-block text-sm font-medium text-[#4DD9D0] transition group-hover:text-[#4DD9D0]">
                 Explore AI →
               </span>
             </Link>
@@ -180,7 +195,7 @@ export default function Home() {
       </section>
 
       {/* ── Gallery Preview ── */}
-      <section className="px-5 py-20 sm:px-10">
+      <section className="relative px-5 py-20 sm:px-10">
         <div className="mx-auto max-w-3xl">
           <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
             {home.galleryPreview.heading}
@@ -189,14 +204,11 @@ export default function Home() {
             {home.galleryPreview.description}
           </p>
 
-          {/* empty state — abstract visual */}
+          {/* empty state — abstract visual with subtle color */}
           <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="aspect-[4/3] rounded-xl border border-[#FFF2DB]/5 bg-[#0a0a0a] transition group-hover:border-[#FFF2DB]/10"
-              />
-            ))}
+            <div className="aspect-[4/3] rounded-xl border border-[#8B6CFF]/10 bg-gradient-to-br from-[#8B6CFF]/[0.06] to-transparent transition group-hover:border-[#8B6CFF]/20" />
+            <div className="aspect-[4/3] rounded-xl border border-[#4DD9D0]/10 bg-gradient-to-br from-[#4DD9D0]/[0.06] to-transparent transition group-hover:border-[#4DD9D0]/20" />
+            <div className="aspect-[4/3] rounded-xl border border-[#F5A623]/10 bg-gradient-to-br from-[#F5A623]/[0.06] to-transparent transition group-hover:border-[#F5A623]/20" />
           </div>
 
           <Link
@@ -209,8 +221,13 @@ export default function Home() {
       </section>
 
       {/* ── Prizia Invitation ── */}
-      <section className="px-5 py-24 sm:px-10">
-        <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+      <section className="relative px-5 py-24 sm:px-10">
+        {/* warm closing atmosphere */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute bottom-0 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-[#F5A623]/[0.06] blur-[120px]" />
+          <div className="absolute top-0 right-1/4 h-[300px] w-[300px] rounded-full bg-[#8B6CFF]/[0.04] blur-[80px]" />
+        </div>
+        <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
           <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
             {home.priziaInvitation.heading}
           </h2>

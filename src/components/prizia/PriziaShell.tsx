@@ -161,8 +161,13 @@ export default function PriziaShell() {
       <NavBar />
 
       {messages.length === 0 ? (
-        <main className="flex min-h-[calc(100vh-112px)] items-center justify-center px-5 pb-24 pt-28 sm:px-10">
-          <section className="flex w-full max-w-3xl flex-col items-center text-center">
+        <main className="relative flex min-h-[calc(100vh-112px)] items-center justify-center px-5 pb-24 pt-28 sm:px-10">
+          {/* atmospheric glows */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/3 left-1/2 h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#8B6CFF]/[0.07] blur-[120px]" />
+            <div className="absolute bottom-1/4 right-1/4 h-[300px] w-[300px] rounded-full bg-[#4DD9D0]/[0.05] blur-[80px]" />
+          </div>
+          <section className="relative z-10 flex w-full max-w-3xl flex-col items-center text-center">
             <div aria-hidden="true" className="mb-5 flex h-28 items-center justify-center sm:mb-7">
               <Image src="/Prizia icon light.png" alt="" width={112} height={112} priority className="h-28 w-28 object-contain" />
             </div>
@@ -191,8 +196,12 @@ export default function PriziaShell() {
           </section>
         </main>
       ) : (
-        <main className="mx-auto flex min-h-[calc(100vh-112px)] w-full max-w-3xl flex-col px-5 pb-32 pt-20 sm:px-10">
-          <div className="flex flex-1 flex-col gap-5">
+        <main className="relative mx-auto flex min-h-[calc(100vh-112px)] w-full max-w-3xl flex-col px-5 pb-32 pt-20 sm:px-10">
+          {/* subtle atmosphere for conversation */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute top-0 left-1/2 h-[400px] w-[500px] -translate-x-1/2 rounded-full bg-[#8B6CFF]/[0.04] blur-[100px]" />
+          </div>
+          <div className="relative z-10 flex flex-1 flex-col gap-5">
             {messages.map((chatMessage) => (
               <article
                 key={chatMessage.id}
