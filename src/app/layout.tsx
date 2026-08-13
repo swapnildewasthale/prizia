@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Audiowide, Comfortaa } from "next/font/google";
-import Footer from "@/components/prizia/Footer";
+import ConditionalFooter from "@/components/prizia/ConditionalFooter";
 import "./globals.css";
 
 const audiowide = Audiowide({
@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="hi">
       <body className={`${audiowide.variable} ${comfortaa.variable} font-sans antialiased`}>
         {children}
-        <Footer />
+        <ConditionalFooter />
       </body>
     </html>
   );

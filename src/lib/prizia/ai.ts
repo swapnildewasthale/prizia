@@ -1,67 +1,104 @@
-import { GoogleGenAI } from "@google/genai";
 import { Message, PriziaResponse } from "./types";
 import { getPriziaSystemInstruction } from "./serverKnowledge";
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const CONCENTRATE_API_URL = "https://api.concentrate.ai/v1/chat/completions";
+const MODEL = process.env.PRIZIA_MODEL || "deepseek-v4-pro";
+const FALLBACK_MODEL = "deepseek-v4-flash";
 
-let aiClient: GoogleGenAI | null = null;
-
-function getClient(): GoogleGenAI {
-  if (!aiClient) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY is not set in environment variables.");
-    }
-    aiClient = new GoogleGenAI({ apiKey });
-  }
-  return aiClient;
+interface ChatMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
 }
 
-function buildContents(
+interface ChatCompletionChoice {
+  message: {
+    role: string;
+    content: string;
+  };
+}
+
+interface ChatCompletionResponse {
+  choices: ChatCompletionChoice[];
+  error?: {
+    message: string;
+    code?: string;
+  };
+}
+
+function buildMessages(
   message: string,
   conversationHistory: Message[]
-): { role: string; parts: { text: string }[] }[] {
-  const contents: { role: string; parts: { text: string }[] }[] = [];
+): ChatMessage[] {
+  const messages: ChatMessage[] = [];
+
+  messages.push({
+    role: "system",
+    content: getPriziaSystemInstruction(),
+  });
 
   for (const msg of conversationHistory) {
-    contents.push({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }],
+    messages.push({
+      role: msg.role === "user" ? "user" : "assistant",
+      content: msg.content,
     });
   }
 
-  contents.push({
+  messages.push({
     role: "user",
-    parts: [{ text: message }],
+    content: message,
   });
 
-  return contents;
+  return messages;
+}
+
+async function callConcentrate(
+  model: string,
+  messages: ChatMessage[]
+): Promise<string> {
+  const apiKey = process.env.CONCENTRATEAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("CONCENTRATEAI_API_KEY is not set in environment variables.");
+  }
+
+  const res = await fetch(CONCENTRATE_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`Concentrate API error (${res.status}): ${errorBody}`);
+  }
+
+  const data: ChatCompletionResponse = await res.json();
+
+  if (data.error) {
+    throw new Error(`Concentrate API: ${data.error.message}`);
+  }
+
+  return data.choices?.[0]?.message?.content ?? "";
 }
 
 export async function generatePriziaResponse(
   message: string,
   conversationHistory: Message[]
 ): Promise<PriziaResponse> {
-  const client = getClient();
-  const systemInstruction = getPriziaSystemInstruction();
-  const contents = buildContents(message, conversationHistory);
+  const messages = buildMessages(message, conversationHistory);
 
-  console.log(`[Prizia AI] Model: ${GEMINI_MODEL}`);
-  console.log(`[Prizia AI] System instruction: ${systemInstruction.length} chars`);
-  console.log(`[Prizia AI] Conversation turns: ${contents.length}`);
+  console.log(`[Prizia AI] Model: ${MODEL}`);
+  console.log(`[Prizia AI] Conversation turns: ${messages.length}`);
 
   try {
-    const response = await client.models.generateContent({
-      model: GEMINI_MODEL,
-      contents,
-      config: {
-        systemInstruction,
-        temperature: 0.7,
-        maxOutputTokens: 1024,
-      },
-    });
-
-    const text = response.text ?? "";
+    const text = await callConcentrate(MODEL, messages);
     console.log(`[Prizia AI] Response length: ${text.length} chars`);
 
     return {
@@ -70,25 +107,15 @@ export async function generatePriziaResponse(
       suggestions: [],
     };
   } catch (err) {
-    console.error("[Prizia AI] Gemini error:", err);
+    console.error(`[Prizia AI] ${MODEL} error:`, err);
 
-    // If the model fails, try a fallback model
-    if (GEMINI_MODEL !== "gemini-2.0-flash") {
-      console.log("[Prizia AI] Retrying with gemini-2.0-flash...");
+    if (MODEL !== FALLBACK_MODEL) {
+      console.log(`[Prizia AI] Retrying with ${FALLBACK_MODEL}...`);
       try {
-        const fallbackResponse = await client.models.generateContent({
-          model: "gemini-2.0-flash",
-          contents,
-          config: {
-            systemInstruction,
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-          },
-        });
-        const fallbackText = fallbackResponse.text ?? "";
+        const text = await callConcentrate(FALLBACK_MODEL, messages);
         return {
           mode: "CHAT",
-          text: fallbackText || "I'm not sure how to respond to that. Could you try rephrasing?",
+          text: text || "I'm not sure how to respond to that. Could you try rephrasing?",
           suggestions: [],
         };
       } catch (fallbackErr) {

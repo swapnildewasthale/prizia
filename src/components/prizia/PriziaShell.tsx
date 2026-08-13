@@ -47,10 +47,15 @@ export default function PriziaShell() {
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(searchParams));
   const [isThinking, setIsThinking] = useState(() => !!searchParams.get("q")?.trim());
   const historyRef = useRef<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     historyRef.current = messages;
   }, [messages]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isThinking]);
 
   useEffect(() => {
     if (messages.length !== 1 || messages[0].role !== "user" || isThinking === false) return;
@@ -89,18 +94,31 @@ export default function PriziaShell() {
       setMessage("");
       setIsThinking(true);
 
-      const response = await fetchPriziaResponse(value, historyRef.current);
+      try {
+        const response = await fetchPriziaResponse(value, historyRef.current);
 
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: response.text,
-          mode: response.mode,
-        },
-      ]);
-      setIsThinking(false);
+        setMessages((currentMessages) => [
+          ...currentMessages,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: response.text,
+            mode: response.mode,
+          },
+        ]);
+      } catch {
+        setMessages((currentMessages) => [
+          ...currentMessages,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: "Something went wrong while I was thinking. Try asking me again.",
+            mode: "CHAT",
+          },
+        ]);
+      } finally {
+        setIsThinking(false);
+      }
     },
     [isThinking]
   );
@@ -173,7 +191,7 @@ export default function PriziaShell() {
           </section>
         </main>
       ) : (
-        <main className="mx-auto flex min-h-[calc(100vh-112px)] w-full max-w-3xl flex-col px-5 pb-32 pt-8 sm:px-10">
+        <main className="mx-auto flex min-h-[calc(100vh-112px)] w-full max-w-3xl flex-col px-5 pb-32 pt-20 sm:px-10">
           <div className="flex flex-1 flex-col gap-5">
             {messages.map((chatMessage) => (
               <article
@@ -184,6 +202,7 @@ export default function PriziaShell() {
               </article>
             ))}
             {isThinking && <p className="text-sm text-[#a49ba0]">Prizia is thinking…</p>}
+            <div ref={messagesEndRef} />
           </div>
           <div className="fixed inset-x-0 bottom-0 border-t border-white/10 bg-[#101015]/95 px-5 py-5 backdrop-blur sm:px-10">
             <div className="mx-auto w-full max-w-3xl">{input}</div>

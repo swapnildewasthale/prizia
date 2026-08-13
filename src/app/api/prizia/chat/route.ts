@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
       console.error("[Prizia API] Cause:", String(error.cause));
     }
 
-    if (message.includes("GEMINI_API_KEY") || !process.env.GEMINI_API_KEY) {
+    if (message.includes("CONCENTRATEAI_API_KEY") || !process.env.CONCENTRATEAI_API_KEY) {
       return NextResponse.json(
-        { mode: "CHAT", text: "I'm not configured properly yet. Please check the GEMINI_API_KEY environment variable.", suggestions: [] },
+        { mode: "CHAT", text: "I'm not configured properly yet. Please check the CONCENTRATEAI_API_KEY environment variable.", suggestions: [] },
         { status: 500 }
       );
     }
