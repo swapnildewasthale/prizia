@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import NavBar from "@/components/prizia/NavBar";
+import RegistrationSection from "@/components/prizia/RegistrationSection";
 import { home } from "@/content/prizmistic/home";
 
 const valueIcons: Record<string, React.ReactNode> = {
@@ -126,6 +127,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Free AI Experience / Registration ── */}
+      <RegistrationSection />
 
       {/* ── Values: Learn / Make / Experiment / Explore ── */}
       <section className="px-5 py-20 sm:px-10">

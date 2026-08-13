@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
 
     console.error("[Prizia API] Error:", message, "| name:", name, "| status:", status, "| statusText:", statusText);
 
-    // Log full error object for debugging (excluding sensitive data)
     if (error instanceof Error && error.cause) {
       console.error("[Prizia API] Cause:", String(error.cause));
     }
@@ -58,7 +57,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return the actual error message in development for debugging
     const isDev = process.env.NODE_ENV === "development";
     const userMessage = isDev
       ? `Something went wrong: ${message}`

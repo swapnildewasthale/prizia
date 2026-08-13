@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Audiowide, Comfortaa } from "next/font/google";
 import ConditionalFooter from "@/components/prizia/ConditionalFooter";
+import { FormModalProvider } from "@/components/prizia/FormModalContext";
 import "./globals.css";
 
 const audiowide = Audiowide({
@@ -31,8 +32,10 @@ export default function RootLayout({
   return (
     <html lang="hi">
       <body className={`${audiowide.variable} ${comfortaa.variable} font-sans antialiased`}>
-        {children}
-        <ConditionalFooter />
+        <FormModalProvider>
+          {children}
+          <ConditionalFooter />
+        </FormModalProvider>
       </body>
     </html>
   );

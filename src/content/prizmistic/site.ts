@@ -8,7 +8,6 @@ export const site = {
     { label: "About", href: "/about" },
     { label: "Explore", href: "/explore" },
     { label: "Gallery", href: "/gallery" },
-    { label: "Prizia", href: "/prizia" },
   ] as const,
   footer: {
     tagline: "Learn · Make · Explore",

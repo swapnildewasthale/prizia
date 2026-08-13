@@ -29,12 +29,9 @@ function buildMessages(
   message: string,
   conversationHistory: Message[]
 ): ChatMessage[] {
-  const messages: ChatMessage[] = [];
-
-  messages.push({
-    role: "system",
-    content: getPriziaSystemInstruction(),
-  });
+  const messages: ChatMessage[] = [
+    { role: "system", content: getPriziaSystemInstruction() },
+  ];
 
   for (const msg of conversationHistory) {
     messages.push({
@@ -43,10 +40,7 @@ function buildMessages(
     });
   }
 
-  messages.push({
-    role: "user",
-    content: message,
-  });
+  messages.push({ role: "user", content: message });
 
   return messages;
 }
@@ -70,7 +64,6 @@ async function callConcentrate(
       model,
       messages,
       temperature: 0.7,
-      max_tokens: 1024,
     }),
   });
 
