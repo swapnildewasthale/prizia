@@ -1,5 +1,6 @@
 import { Message, PriziaResponse } from "./types";
-import { getPriziaSystemInstruction } from "./serverKnowledge";
+import { PriziaConfig } from "@/lib/studio/types";
+import { getPriziaSystemInstructionAsync, buildSystemInstructionFromConfig, getRelevantKnowledge } from "./serverKnowledge";
 
 const CONCENTRATE_API_URL = "https://api.concentrate.ai/v1/chat/completions";
 const MODEL = process.env.PRIZIA_MODEL || "deepseek-v4-pro";
@@ -27,10 +28,11 @@ interface ChatCompletionResponse {
 
 function buildMessages(
   message: string,
-  conversationHistory: Message[]
+  conversationHistory: Message[],
+  systemInstruction: string
 ): ChatMessage[] {
   const messages: ChatMessage[] = [
-    { role: "system", content: getPriziaSystemInstruction() },
+    { role: "system", content: systemInstruction },
   ];
 
   for (const msg of conversationHistory) {
@@ -85,7 +87,8 @@ export async function generatePriziaResponse(
   message: string,
   conversationHistory: Message[]
 ): Promise<PriziaResponse> {
-  const messages = buildMessages(message, conversationHistory);
+  const systemInstruction = await getPriziaSystemInstructionAsync();
+  const messages = buildMessages(message, conversationHistory, systemInstruction);
 
   console.log(`[Prizia AI] Model: ${MODEL}`);
   console.log(`[Prizia AI] Conversation turns: ${messages.length}`);
@@ -113,6 +116,48 @@ export async function generatePriziaResponse(
         };
       } catch (fallbackErr) {
         console.error("[Prizia AI] Fallback also failed:", fallbackErr);
+      }
+    }
+
+    throw err;
+  }
+}
+
+export async function generatePriziaResponseWithConfig(
+  message: string,
+  conversationHistory: Message[],
+  config: PriziaConfig
+): Promise<PriziaResponse> {
+  const knowledge = getRelevantKnowledge(message);
+  const systemInstruction = buildSystemInstructionFromConfig(config, knowledge);
+  const messages = buildMessages(message, conversationHistory, systemInstruction);
+
+  console.log(`[Prizia AI Test] Model: ${MODEL}`);
+  console.log(`[Prizia AI Test] Conversation turns: ${messages.length}`);
+
+  try {
+    const text = await callConcentrate(MODEL, messages);
+    console.log(`[Prizia AI Test] Response length: ${text.length} chars`);
+
+    return {
+      mode: "CHAT",
+      text: text || "I'm not sure how to respond to that. Could you try rephrasing?",
+      suggestions: [],
+    };
+  } catch (err) {
+    console.error(`[Prizia AI Test] ${MODEL} error:`, err);
+
+    if (MODEL !== FALLBACK_MODEL) {
+      console.log(`[Prizia AI Test] Retrying with ${FALLBACK_MODEL}...`);
+      try {
+        const text = await callConcentrate(FALLBACK_MODEL, messages);
+        return {
+          mode: "CHAT",
+          text: text || "I'm not sure how to respond to that. Could you try rephrasing?",
+          suggestions: [],
+        };
+      } catch (fallbackErr) {
+        console.error("[Prizia AI Test] Fallback also failed:", fallbackErr);
       }
     }
 

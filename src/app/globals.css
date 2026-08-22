@@ -119,3 +119,9 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* --- Safe Area (iOS) --- */
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
