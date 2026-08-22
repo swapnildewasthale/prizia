@@ -54,7 +54,7 @@ export function getRelevantKnowledge(userMessage: string): string {
   const lower = userMessage.toLowerCase();
   const isPhotoQuery = /photo|camera|lens|exposure|aperture|composition|lighting|portrait|street|landscape|editing|image|visual|picture|shoot|focus/.test(lower);
   const isMusicQuery = /music|song|sing|play|instrument|guitar|piano|drum|rhythm|melody|harmony|chord|beat|sound|audio|record|compose|lyric|voice|band|concert|perform/.test(lower);
-  const isAIQuery = /ai|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(lower);
+  const isAIQuery = /\bai\b|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(lower);
   const isPrizQuery = /prizmistic|prizia|workshop|exploring|what (is|are) (this|here)|tell me about/.test(lower);
   const boostIds = new Set<string>();
   if (isPhotoQuery) { boostIds.add("37"); boostIds.add("38"); boostIds.add("40"); }

@@ -95,7 +95,7 @@ export async function searchKnowledgeAsync(query: string): Promise<Section[]> {
   // Check for specific workshop queries
   const isPhotographyWorkshopQuery = /photo|camera|lens|exposure|aperture|composition|lighting|portrait|street|landscape|editing|lightroom|photoshop|image|visual|picture|shoot|frame|focus/.test(lower);
   const isMusicWorkshopQuery = /music|song|sing|play|instrument|guitar|piano|drum|rhythm|melody|harmony|chord|beat|sound|audio|record|compose|lyric|voice|band|concert|perform|improvise|listen/.test(lower);
-  const isAIWorkshopQuery = /ai|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(lower);
+  const isAIWorkshopQuery = /\bai\b|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(lower);
   const isWorkshopQuery = /workshop|class|session|course|learn|teach|instruct|facilitat/.test(lower);
 
   const scored = sections.map((section) => {
@@ -145,7 +145,7 @@ export function searchKnowledge(query: string): Section[] {
   // Check for specific workshop queries
   const isPhotographyWorkshopQuery = /photo|camera|lens|exposure|aperture|composition|lighting|portrait|street|landscape|editing|lightroom|photoshop|image|visual|picture|shoot|frame|focus/.test(lower);
   const isMusicWorkshopQuery = /music|song|sing|play|instrument|guitar|piano|drum|rhythm|melody|harmony|chord|beat|sound|audio|record|compose|lyric|voice|band|concert|perform|improvise|listen/.test(lower);
-  const isAIWorkshopQuery = /ai|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(lower);
+  const isAIWorkshopQuery = /\bai\b|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(lower);
   const isWorkshopQuery = /workshop|class|session|course|learn|teach|instruct|facilitat/.test(lower);
 
   const scored = sections.map((section) => {
