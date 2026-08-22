@@ -6,9 +6,10 @@ export async function POST() {
     await publishDraft();
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[Studio] Publish error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[Studio] Publish error:", message);
     return NextResponse.json(
-      { error: "Failed to publish." },
+      { error: message },
       { status: 500 }
     );
   }

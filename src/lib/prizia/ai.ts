@@ -87,7 +87,7 @@ export async function generatePriziaResponse(
   message: string,
   conversationHistory: Message[]
 ): Promise<PriziaResponse> {
-  const systemInstruction = await getPriziaSystemInstructionAsync();
+  const systemInstruction = await getPriziaSystemInstructionAsync(message);
   const messages = buildMessages(message, conversationHistory, systemInstruction);
 
   console.log(`[Prizia AI] Model: ${MODEL}`);

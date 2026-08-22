@@ -57,18 +57,20 @@ export function getRelevantKnowledge(userMessage: string): string {
   const isAIQuery = /ai|artificial|machine learn|deep learn|neural|generat|prompt|model|train|algorithm|agent|chatbot|llm|nlp|large language/.test(lower);
   const isPrizQuery = /prizmistic|prizia|workshop|exploring|what (is|are) (this|here)|tell me about/.test(lower);
   const boostIds = new Set<string>();
-  if (isPhotoQuery) { boostIds.add("37"); boostIds.add("38"); }
-  if (isMusicQuery) { boostIds.add("37"); boostIds.add("39"); }
-  if (isAIQuery) { boostIds.add("7"); boostIds.add("8"); boostIds.add("9"); }
-  if (isPrizQuery) { for (const id of ["2","3","4","5","6","13","14","15","16","30","32","35","36"]) { boostIds.add(id); } }
+  if (isPhotoQuery) { boostIds.add("37"); boostIds.add("38"); boostIds.add("40"); }
+  if (isMusicQuery) { boostIds.add("37"); boostIds.add("39"); boostIds.add("40"); }
+  if (isAIQuery) { boostIds.add("7"); boostIds.add("8"); boostIds.add("9"); boostIds.add("40"); }
+  if (isPrizQuery) { for (const id of ["2","3","4","5","6","13","14","15","16","30","32","35","36","40"]) { boostIds.add(id); } }
   const words = lower.split(/[\s,.-]+/).filter((w) => w.length > 2);
+  const wordRegexes = words.map((w) => new RegExp("\\b" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b"));
   const scored = sections.map((section) => {
     let score = 0;
     const sectionLower = (section.title + " " + section.content).toLowerCase();
+    const titleLower = section.title.toLowerCase();
     if (boostIds.has(section.id)) score += 5;
-    for (const word of words) {
-      if (section.title.toLowerCase().includes(word)) score += 3;
-      if (sectionLower.includes(word)) score += 1;
+    for (const regex of wordRegexes) {
+      if (regex.test(titleLower)) score += 3;
+      if (regex.test(sectionLower)) score += 1;
     }
     return { section, score };
   });
@@ -90,12 +92,12 @@ export function buildSystemInstructionFromConfig(config: PriziaConfig, knowledge
   parts.push("## Response Style\n" + communication.responseStyle + "\n");
   parts.push("## RESPONSE LENGTH\n" + communication.responseLength + "\n");
   parts.push("## Behavior Rules\n" + behavior.challengeAssumptions + "\n\n" + behavior.askQuestions + "\n\n" + behavior.handleUncertainty + "\n\n" + behavior.connectToPrizmistic + "\n\n" + behavior.customInstructions + "\n");
-  parts.push("## Conversational Rules\n- Answer directly. Keep simple answers short.\n- Explain deeply when the user wants depth.\n- Ask useful follow-up questions when it genuinely helps.\n- Remember the immediate conversation context.\n- Encourage curiosity.\n- Connect ideas when relevant.\n- Admit when you don't know something.\n- Avoid unnecessary hedging and excessive disclaimers.\n- Don't constantly ask \"Would you like me to...\"\n\n## DO NOT PRETEND TO HAVE PERSONAL EXPERIENCE\nNever claim you personally attended a workshop, used a physical space, met someone, saw something, or experienced something.\n\n## DO NOT CLAIM PERSISTENT MEMORY\nDo not claim persistent memory across sessions. Conversation context within the current session CAN be used.\n\n## Active Domains\nPrizmistic is currently exploring: AI, Photography, Music.\nThese do NOT restrict what you can discuss. They provide deeper context when relevant.\n\n## Hallucination Prevention \u2014 CRITICAL\nNEVER invent Prizmistic facts. If you don't have official information, say: \"I don't have that information right now, and I don't want to guess.\"\nNever invent: workshops, dates, prices, instructors, facilities, availability, partnerships, policies, events, future plans.\n\n## UNKNOWN INFORMATION \u2014 HONEST HANDLING\n- Prizmistic information unavailable: \"I don't have that information right now.\"\n- Live/current data required: \"I don't have live access to that right now.\"\n- General knowledge uncertain: \"I'm not certain about that.\"\n- NEVER fabricate.\n");
+  parts.push("## Conversational Rules\n- Answer directly. Keep simple answers short.\n- Explain deeply when the user wants depth.\n- Ask useful follow-up questions when it genuinely helps.\n- Remember the immediate conversation context.\n- Encourage curiosity.\n- Connect ideas when relevant.\n- Admit when you don't know something.\n- Avoid unnecessary hedging and excessive disclaimers.\n- Don't constantly ask \"Would you like me to...\"\n\n## DO NOT PRETEND TO HAVE PERSONAL EXPERIENCE\nNever claim you personally attended a workshop, used a physical space, met someone, saw something, or experienced something.\n\n## DO NOT CLAIM PERSISTENT MEMORY\nDo not claim persistent memory across sessions. Conversation context within the current session CAN be used.\n\n## Hallucination Prevention \u2014 CRITICAL\nNEVER invent Prizmistic facts. If you don't have official information, say: \"I don't have that information right now, and I don't want to guess.\"\nNever invent: workshops, dates, prices, instructors, facilities, availability, partnerships, policies, events, future plans.\n\n## UNKNOWN INFORMATION \u2014 HONEST HANDLING\n- Prizmistic information unavailable: \"I don't have that information right now.\"\n- Live/current data required: \"I don't have live access to that right now.\"\n- General knowledge uncertain: \"I'm not certain about that.\"\n- NEVER fabricate.\n");
   parts.push("## Prizmistic Knowledge Base\nUse the following official Prizmistic knowledge when answering questions about Prizmistic:\n\n" + knowledge + extraKnowledge + "\n\nRemember: GENERAL INTELLIGENCE + DEEP PRIZMISTIC UNDERSTANDING.\nBe intelligent first. Prizmistic when relevant. Never force it.\nYou are " + identity.name + ".");
   return parts.join("\n");
 }
 
-export async function getPriziaSystemInstructionAsync(): Promise<string> {
+export async function getPriziaSystemInstructionAsync(userMessage: string): Promise<string> {
   let config = defaultConfig;
   try {
     const { getPublishedConfig } = await import("@/lib/studio/storage");
@@ -103,7 +105,7 @@ export async function getPriziaSystemInstructionAsync(): Promise<string> {
   } catch {
     console.warn("[serverKnowledge] Could not load published config, using defaults");
   }
-  const knowledge = getRelevantKnowledge("Prizmistic overview active domains philosophy");
+  const knowledge = getRelevantKnowledge(userMessage);
   return buildSystemInstructionFromConfig(config, knowledge);
 }
 

@@ -8,9 +8,10 @@ export async function POST(request: NextRequest) {
     await saveDraft(config);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("[Studio] Save draft error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[Studio] Save draft error:", message);
     return NextResponse.json(
-      { error: "Failed to save draft." },
+      { error: message },
       { status: 500 }
     );
   }

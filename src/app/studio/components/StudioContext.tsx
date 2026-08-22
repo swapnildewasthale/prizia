@@ -66,14 +66,18 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(draft),
       });
+      const data = await res.json().catch(() => null);
       if (res.ok) {
         setHasChanges(false);
         setMessage({ type: "success", text: "Draft saved." });
       } else {
-        setMessage({ type: "error", text: "Failed to save draft." });
+        const errMsg = data?.error || "Failed to save draft.";
+        setMessage({ type: "error", text: errMsg });
+        console.error("[Studio] Save draft failed:", errMsg);
       }
-    } catch {
-      setMessage({ type: "error", text: "Failed to save draft." });
+    } catch (err) {
+      console.error("[Studio] Save draft network error:", err);
+      setMessage({ type: "error", text: "Network error: could not reach the server." });
     } finally {
       setSaving(false);
     }
@@ -84,14 +88,18 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     setMessage(null);
     try {
       const res = await fetch("/api/studio/publish", { method: "POST" });
+      const data = await res.json().catch(() => null);
       if (res.ok) {
         setMessage({ type: "success", text: "Published! Live Prizia now uses this configuration." });
         setHasChanges(false);
       } else {
-        setMessage({ type: "error", text: "Failed to publish." });
+        const errMsg = data?.error || "Failed to publish.";
+        setMessage({ type: "error", text: errMsg });
+        console.error("[Studio] Publish failed:", errMsg);
       }
-    } catch {
-      setMessage({ type: "error", text: "Failed to publish." });
+    } catch (err) {
+      console.error("[Studio] Publish network error:", err);
+      setMessage({ type: "error", text: "Network error: could not reach the server." });
     } finally {
       setPublishing(false);
     }

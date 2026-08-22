@@ -16,7 +16,7 @@ export function ActionBar() {
       {/* Toast notification */}
       {message && (
         <div
-          className={`fixed bottom-20 left-1/2 -translate-x-1/2 z-50 rounded-xl px-5 py-3 text-sm shadow-lg max-w-[90vw] text-center ${
+          className={`fixed bottom-20 left-1/2 -translate-x-1/2 z-50 rounded-xl px-5 py-3 text-sm shadow-lg max-w-[90vw] text-center whitespace-normal break-words ${
             message.type === "success"
               ? "bg-green-900/90 text-green-200 border border-green-500/20"
               : "bg-red-900/90 text-red-200 border border-red-500/20"
