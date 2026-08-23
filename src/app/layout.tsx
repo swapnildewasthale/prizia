@@ -5,6 +5,8 @@ import { FormModalProvider } from "@/components/prizia/FormModalContext";
 import { getPublishedWebsiteConfig } from "@/lib/website/storage";
 import "./globals.css";
 
+export const dynamic = "force-dynamic";
+
 const audiowide = Audiowide({
   subsets: ["latin"],
   weight: "400",

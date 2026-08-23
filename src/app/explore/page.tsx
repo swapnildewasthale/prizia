@@ -2,6 +2,8 @@ import Link from "next/link";
 import NavBar from "@/components/prizia/NavBar";
 import { getPublishedWebsiteConfig } from "@/lib/website/storage";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Explore — Prizmistic",
   description: "Explore what Prizmistic is learning, making and experimenting with.",

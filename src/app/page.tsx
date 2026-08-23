@@ -4,6 +4,8 @@ import { EditorProvider } from "@/components/prizia/EditorContext";
 import EditorToggle from "@/components/prizia/EditorToggle";
 import EditorPanel from "@/components/prizia/EditorPanel";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const config = await getPublishedWebsiteConfig();
   return (
