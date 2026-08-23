@@ -1,11 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEditor } from "./EditorContext";
 
 export default function EditorToggle() {
   const editor = useEditor();
-  const router = useRouter();
   if (!editor?.authenticated) return null;
 
   return (
@@ -57,7 +55,7 @@ export default function EditorToggle() {
       {/* Right side: Go to Studio */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
-          onClick={() => router.push("/studio")}
+          onClick={() => window.open("/studio", "_blank")}
           className="flex items-center gap-2 rounded-full border border-[#FFF2DB]/10 bg-[#0a0a0a] px-4 py-2.5 text-xs font-medium text-[#FFF2DB]/70 shadow-lg transition hover:border-[#4DD9D0]/30 hover:bg-[#111] hover:text-[#FFF2DB]"
           title="Go to Studio"
         >

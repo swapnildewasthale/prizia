@@ -49,7 +49,7 @@ export function StudioHeader({ onMenuClick }: StudioHeaderProps) {
           onClick={handleLogout}
           className="text-xs text-[#FFF2DB]/30 transition hover:text-[#FFF2DB]/60"
         >
-          Sign out
+          Logout
         </button>
       </div>
     </header>
