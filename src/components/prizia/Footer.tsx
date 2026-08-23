@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { site } from "@/content/prizmistic/site";
+import { WebsiteConfig } from "@/lib/website/types";
 
-export default function Footer() {
-  const { footer } = site;
+interface FooterProps {
+  footer?: WebsiteConfig["footer"];
+}
+
+export default function Footer({ footer: footerProp }: FooterProps) {
+  const footer = footerProp ?? site.footer;
 
   return (
     <footer className="relative border-t border-[#FFF2DB]/5 bg-[#000000]">

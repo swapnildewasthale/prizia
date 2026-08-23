@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { site } from "@/content/prizmistic/site";
+import { WebsiteConfig } from "@/lib/website/types";
 import { useFormModal } from "./FormModalContext";
 
-export default function NavBar() {
+interface NavBarProps {
+  nav?: WebsiteConfig["nav"];
+}
+
+export default function NavBar({ nav }: NavBarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openForm } = useFormModal();
+  const links = nav ?? site.nav;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-[#FFF2DB]/5">
@@ -24,7 +30,7 @@ export default function NavBar() {
 
         {/* Center: Navigation links (genuinely centered via grid) */}
         <div className="flex justify-center gap-8">
-          {site.nav.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -76,7 +82,7 @@ export default function NavBar() {
       {/* ── Mobile Menu ── */}
       {isMenuOpen && (
         <div className="border-t border-[#FFF2DB]/5 px-6 py-4 sm:hidden">
-          {site.nav.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
