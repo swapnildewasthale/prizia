@@ -3,6 +3,7 @@ import { Audiowide, Comfortaa } from "next/font/google";
 import ConditionalFooter from "@/components/prizia/ConditionalFooter";
 import { FormModalProvider } from "@/components/prizia/FormModalContext";
 import { getPublishedWebsiteConfig } from "@/lib/website/storage";
+import StudioShell from "@/components/studio/StudioShell";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,7 @@ export default async function RootLayout({
     <html lang="hi">
       <body className={`${audiowide.variable} ${comfortaa.variable} font-sans antialiased`}>
         <FormModalProvider>
-          {children}
+          <StudioShell>{children}</StudioShell>
           <ConditionalFooter footerConfig={config.footer} />
         </FormModalProvider>
       </body>

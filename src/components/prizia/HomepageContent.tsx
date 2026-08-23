@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import Editable from "@/components/prizia/Editable";
-import { useEditor } from "@/components/prizia/EditorContext";
+import { useWebsiteEditor } from "@/components/studio/WebsiteEditorContext";
 import NavBar from "@/components/prizia/NavBar";
 import RegistrationSection from "@/components/prizia/RegistrationSection";
 import { WebsiteConfig } from "@/lib/website/types";
@@ -39,7 +39,7 @@ interface HomepageContentProps {
 export default function HomepageContent({ config }: HomepageContentProps) {
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const editor = useEditor();
+  const editor = useWebsiteEditor();
   const activeConfig =
     editor?.editMode && editor.draft ? editor.draft : config;
   const { homepage, nav } = activeConfig;

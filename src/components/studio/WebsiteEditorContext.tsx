@@ -6,16 +6,15 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
+  ReactNode,
 } from "react";
 import { WebsiteConfig } from "@/lib/website/types";
 
-interface EditorContextValue {
+interface WebsiteEditorContextValue {
   authenticated: boolean;
   editMode: boolean;
   toggleEditMode: () => void;
-  logout: () => Promise<void>;
   draft: WebsiteConfig | null;
   activeField: string | null;
   setActiveField: (path: string | null) => void;
@@ -24,13 +23,21 @@ interface EditorContextValue {
   publishDraft: () => Promise<void>;
   saving: boolean;
   publishing: boolean;
-  toast: string | null;
+  hasChanges: boolean;
+  message: { type: "success" | "error"; text: string } | null;
+  clearMessage: () => void;
+  logout: () => Promise<void>;
+  showLogoutConfirm: boolean;
+  setShowLogoutConfirm: (show: boolean) => void;
 }
 
-const EditorContext = createContext<EditorContextValue | null>(null);
+const WebsiteEditorContext = createContext<WebsiteEditorContextValue | null>(null);
 
-export function useEditor() {
-  return useContext(EditorContext);
+export function useWebsiteEditor() {
+  const ctx = useContext(WebsiteEditorContext);
+  if (!ctx)
+    throw new Error("useWebsiteEditor must be used within WebsiteEditorProvider");
+  return ctx;
 }
 
 function setByPath(obj: unknown, path: string, value: unknown): unknown {
@@ -65,35 +72,31 @@ function setByPath(obj: unknown, path: string, value: unknown): unknown {
   };
 }
 
-export function EditorProvider({ children }: { children: React.ReactNode }) {
+export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(true);
   const [draft, setDraft] = useState<WebsiteConfig | null>(null);
   const [activeField, setActiveField] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const urlChecked = useRef(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     fetch("/api/studio/auth/check")
       .then((r) => r.json())
       .then((data) => {
         setAuthenticated(data.authenticated);
-        if (data.authenticated && !urlChecked.current) {
-          urlChecked.current = true;
-          const params = new URLSearchParams(window.location.search);
-          if (params.get("edit") === "true") {
-            setEditMode(true);
-          }
-        }
       })
       .catch(() => setAuthenticated(false));
   }, []);
 
   useEffect(() => {
-    if (!authenticated) return;
-    if (editMode && !draft) {
+    if (authenticated && !draft) {
       fetch("/api/studio/website/config")
         .then((r) => r.json())
         .then((data) => {
@@ -101,13 +104,24 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         })
         .catch(() => {});
     }
-  }, [authenticated, editMode, draft]);
+  }, [authenticated, draft]);
 
   useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3000);
+    if (!message) return;
+    const t = setTimeout(() => setMessage(null), 3000);
     return () => clearTimeout(t);
-  }, [toast]);
+  }, [message]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasChanges]);
 
   const toggleEditMode = useCallback(() => {
     setEditMode((prev) => {
@@ -116,19 +130,19 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const updateDraft = useCallback(
-    (path: string, value: string) => {
-      setDraft((prev) => {
-        if (!prev) return prev;
-        return setByPath(prev, path, value) as WebsiteConfig;
-      });
-    },
-    [],
-  );
+  const updateDraft = useCallback((path: string, value: string) => {
+    setDraft((prev) => {
+      if (!prev) return prev;
+      return setByPath(prev, path, value) as WebsiteConfig;
+    });
+    setHasChanges(true);
+    setMessage(null);
+  }, []);
 
   const saveDraft = useCallback(async () => {
     if (!draft) return;
     setSaving(true);
+    setMessage(null);
     try {
       const res = await fetch("/api/studio/website/config/save", {
         method: "POST",
@@ -136,9 +150,10 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ draft }),
       });
       if (!res.ok) throw new Error("Save failed");
-      setToast("Draft saved");
+      setHasChanges(false);
+      setMessage({ type: "success", text: "Draft saved." });
     } catch {
-      setToast("Failed to save draft");
+      setMessage({ type: "error", text: "Failed to save draft." });
     } finally {
       setSaving(false);
     }
@@ -147,21 +162,24 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const publishDraft = useCallback(async () => {
     if (!draft) return;
     setPublishing(true);
+    setMessage(null);
     try {
-      const res = await fetch("/api/studio/website/config/save", {
+      const saveRes = await fetch("/api/studio/website/config/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ draft }),
       });
-      if (!res.ok) throw new Error("Save before publish failed");
+      if (!saveRes.ok) throw new Error("Save before publish failed");
 
       const pubRes = await fetch("/api/studio/website/publish", {
         method: "POST",
       });
       if (!pubRes.ok) throw new Error("Publish failed");
-      setToast("Published!");
+
+      setHasChanges(false);
+      setMessage({ type: "success", text: "Published!" });
     } catch {
-      setToast("Failed to publish");
+      setMessage({ type: "error", text: "Failed to publish." });
     } finally {
       setPublishing(false);
     }
@@ -175,15 +193,16 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       setEditMode(false);
       setDraft(null);
       setActiveField(null);
+      setHasChanges(false);
+      setShowLogoutConfirm(false);
     }
   }, []);
 
-  const value = useMemo<EditorContextValue>(
+  const value = useMemo<WebsiteEditorContextValue>(
     () => ({
       authenticated,
       editMode,
       toggleEditMode,
-      logout,
       draft,
       activeField,
       setActiveField,
@@ -192,13 +211,17 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       publishDraft,
       saving,
       publishing,
-      toast,
+      hasChanges,
+      message,
+      clearMessage: () => setMessage(null),
+      logout,
+      showLogoutConfirm,
+      setShowLogoutConfirm,
     }),
     [
       authenticated,
       editMode,
       toggleEditMode,
-      logout,
       draft,
       activeField,
       updateDraft,
@@ -206,13 +229,16 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       publishDraft,
       saving,
       publishing,
-      toast,
+      hasChanges,
+      message,
+      logout,
+      showLogoutConfirm,
     ],
   );
 
   return (
-    <EditorContext.Provider value={value}>
+    <WebsiteEditorContext.Provider value={value}>
       {children}
-    </EditorContext.Provider>
+    </WebsiteEditorContext.Provider>
   );
 }

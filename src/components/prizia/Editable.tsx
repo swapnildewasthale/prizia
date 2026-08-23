@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor } from "./EditorContext";
+import { useWebsiteEditor } from "@/components/studio/WebsiteEditorContext";
 
 interface EditableProps {
   path: string;
@@ -9,7 +9,7 @@ interface EditableProps {
 }
 
 export default function Editable({ path, label, children }: EditableProps) {
-  const editor = useEditor();
+  const editor = useWebsiteEditor();
 
   if (!editor?.editMode) {
     return <>{children}</>;
