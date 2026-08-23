@@ -9,7 +9,7 @@ import {
 import { ShellHeader } from "./ShellHeader";
 import { ShellSidebar, StudioWorkspace } from "./ShellSidebar";
 import WebsiteEditorPanel from "./WebsiteEditorPanel";
-import { UploadsPlaceholder } from "./UploadsPlaceholder";
+import { UploadsManager } from "./UploadsManager";
 import { FormattingPlaceholder } from "./FormattingPlaceholder";
 import {
   StudioProvider,
@@ -139,7 +139,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           ) : activeWorkspace === "website" ? (
             <div className="h-full">{children}</div>
           ) : activeWorkspace === "uploads" ? (
-            <UploadsPlaceholder />
+            <UploadsManager />
           ) : activeWorkspace === "global-formatting" ? (
             <FormattingPlaceholder />
           ) : (
