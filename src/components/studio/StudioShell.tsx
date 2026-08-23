@@ -9,7 +9,6 @@ import {
 import { ShellHeader } from "./ShellHeader";
 import { ShellSidebar, StudioWorkspace } from "./ShellSidebar";
 import WebsiteEditorPanel from "./WebsiteEditorPanel";
-import { UploadsManager } from "./UploadsManager";
 import { FormattingPlaceholder } from "./FormattingPlaceholder";
 import {
   StudioProvider,
@@ -138,8 +137,6 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             <PriziaWorkspace />
           ) : activeWorkspace === "website" ? (
             <div className="h-full">{children}</div>
-          ) : activeWorkspace === "uploads" ? (
-            <UploadsManager />
           ) : activeWorkspace === "global-formatting" ? (
             <FormattingPlaceholder />
           ) : (
