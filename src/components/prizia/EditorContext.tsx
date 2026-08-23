@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { WebsiteConfig } from "@/lib/website/types";
@@ -14,6 +15,7 @@ interface EditorContextValue {
   authenticated: boolean;
   editMode: boolean;
   toggleEditMode: () => void;
+  logout: () => Promise<void>;
   draft: WebsiteConfig | null;
   activeField: string | null;
   setActiveField: (path: string | null) => void;
@@ -71,11 +73,21 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const urlChecked = useRef(false);
 
   useEffect(() => {
     fetch("/api/studio/auth/check")
       .then((r) => r.json())
-      .then((data) => setAuthenticated(data.authenticated))
+      .then((data) => {
+        setAuthenticated(data.authenticated);
+        if (data.authenticated && !urlChecked.current) {
+          urlChecked.current = true;
+          const params = new URLSearchParams(window.location.search);
+          if (params.get("edit") === "true") {
+            setEditMode(true);
+          }
+        }
+      })
       .catch(() => setAuthenticated(false));
   }, []);
 
@@ -155,11 +167,23 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     }
   }, [draft]);
 
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/studio/auth/logout", { method: "POST" });
+    } finally {
+      setAuthenticated(false);
+      setEditMode(false);
+      setDraft(null);
+      setActiveField(null);
+    }
+  }, []);
+
   const value = useMemo<EditorContextValue>(
     () => ({
       authenticated,
       editMode,
       toggleEditMode,
+      logout,
       draft,
       activeField,
       setActiveField,
@@ -174,6 +198,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       authenticated,
       editMode,
       toggleEditMode,
+      logout,
       draft,
       activeField,
       updateDraft,

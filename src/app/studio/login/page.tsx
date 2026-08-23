@@ -22,7 +22,7 @@ export default function StudioLoginPage() {
       });
 
       if (res.ok) {
-        router.push("/studio");
+        router.push("/?edit=true");
       } else {
         const data = await res.json();
         setError(data.error || "Invalid password.");
