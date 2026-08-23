@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import Editable from "@/components/prizia/Editable";
+import { useEditor } from "@/components/prizia/EditorContext";
 import NavBar from "@/components/prizia/NavBar";
 import RegistrationSection from "@/components/prizia/RegistrationSection";
 import { WebsiteConfig } from "@/lib/website/types";
@@ -37,7 +39,10 @@ interface HomepageContentProps {
 export default function HomepageContent({ config }: HomepageContentProps) {
   const router = useRouter();
   const [message, setMessage] = useState("");
-  const { homepage } = config;
+  const editor = useEditor();
+  const activeConfig =
+    editor?.editMode && editor.draft ? editor.draft : config;
+  const { homepage, nav } = activeConfig;
 
   const redirectToChat = (text: string) => {
     const value = text.trim();
@@ -52,7 +57,7 @@ export default function HomepageContent({ config }: HomepageContentProps) {
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#000000] font-[family-name:var(--font-comfortaa)] text-[#FFF2DB]">
-      <NavBar nav={config.nav} />
+      <NavBar nav={nav} />
 
       {/* ── Hero ── */}
       <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden px-5 pt-20 sm:px-10">
@@ -64,26 +69,32 @@ export default function HomepageContent({ config }: HomepageContentProps) {
         </div>
 
         <div className="relative z-10 flex max-w-4xl flex-col items-center text-center">
-          <h1 className="font-[family-name:var(--font-audiowide)] text-4xl font-normal leading-tight tracking-[-0.04em] text-[#FFF2DB] sm:text-6xl sm:leading-tight">
-            {homepage.hero.headline.split("\n").map((line, i) => (
-              <span key={i}>
-                {line}
-                {i === 0 && <br />}
-              </span>
-            ))}
-          </h1>
-          <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-[#FFF2DB]/70 sm:text-xl">
-            {homepage.hero.sub}
-          </p>
+          <Editable path="homepage.hero.headline" label="Hero Headline">
+            <h1 className="font-[family-name:var(--font-audiowide)] text-4xl font-normal leading-tight tracking-[-0.04em] text-[#FFF2DB] sm:text-6xl sm:leading-tight">
+              {homepage.hero.headline.split("\n").map((line, i) => (
+                <span key={i}>
+                  {line}
+                  {i === 0 && <br />}
+                </span>
+              ))}
+            </h1>
+          </Editable>
+          <Editable path="homepage.hero.sub" label="Hero Subtext">
+            <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-[#FFF2DB]/70 sm:text-xl">
+              {homepage.hero.sub}
+            </p>
+          </Editable>
         </div>
       </section>
 
       {/* ── Prizia Entry ── */}
       <section className="relative px-5 py-20 sm:px-10">
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-          <p className="mb-4 text-sm font-medium uppercase tracking-widest text-[#F5A623]">
-            {homepage.priziaEntry.label}
-          </p>
+          <Editable path="homepage.priziaEntry.label" label="Entry Label">
+            <p className="mb-4 text-sm font-medium uppercase tracking-widest text-[#F5A623]">
+              {homepage.priziaEntry.label}
+            </p>
+          </Editable>
           <form
             onSubmit={handleSubmit}
             className="flex w-full items-center rounded-[1.35rem] border border-[#FFF2DB]/10 bg-[#0a0a0a] p-1.5 shadow-[0_16px_45px_rgba(0,0,0,0.5)]"
@@ -125,14 +136,18 @@ export default function HomepageContent({ config }: HomepageContentProps) {
           <div className="absolute top-1/2 left-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#8B6CFF]/[0.05] blur-[120px]" />
         </div>
         <div className="relative z-10 mx-auto max-w-3xl">
-          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
-            {homepage.whatIs.heading}
-          </h2>
+          <Editable path="homepage.whatIs.heading" label="What Is Heading">
+            <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
+              {homepage.whatIs.heading}
+            </h2>
+          </Editable>
           <div className="mt-8 space-y-5">
             {homepage.whatIs.paragraphs.map((p, i) => (
-              <p key={i} className="text-base leading-relaxed text-[#FFF2DB]/60 sm:text-lg">
-                {p}
-              </p>
+              <Editable key={i} path={`homepage.whatIs.paragraphs[${i}]`} label={`Paragraph ${i + 1}`}>
+                <p className="text-base leading-relaxed text-[#FFF2DB]/60 sm:text-lg">
+                  {p}
+                </p>
+              </Editable>
             ))}
           </div>
         </div>
@@ -149,7 +164,7 @@ export default function HomepageContent({ config }: HomepageContentProps) {
           <div className="absolute bottom-0 left-0 h-[300px] w-[400px] rounded-full bg-[#8B6CFF]/[0.03] blur-[80px]" />
         </div>
         <div className="relative z-10 mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {homepage.values.map((v) => (
+          {homepage.values.map((v, i) => (
             <div
               key={v.title}
               className="group rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a]/80 p-6 backdrop-blur-sm transition hover:border-[#F5A623]/20 hover:bg-[#111111]/80"
@@ -157,12 +172,16 @@ export default function HomepageContent({ config }: HomepageContentProps) {
               <div className="mb-4 text-[#F5A623] transition group-hover:text-[#F5A623]">
                 {valueIcons[v.icon]}
               </div>
-              <h3 className="font-[family-name:var(--font-audiowide)] text-base font-normal text-[#FFF2DB]">
-                {v.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#FFF2DB]/50">
-                {v.description}
-              </p>
+              <Editable path={`homepage.values[${i}].title`} label={`Value ${i + 1} Title`}>
+                <h3 className="font-[family-name:var(--font-audiowide)] text-base font-normal text-[#FFF2DB]">
+                  {v.title}
+                </h3>
+              </Editable>
+              <Editable path={`homepage.values[${i}].description`} label={`Value ${i + 1} Description`}>
+                <p className="mt-2 text-sm leading-relaxed text-[#FFF2DB]/50">
+                  {v.description}
+                </p>
+              </Editable>
             </div>
           ))}
         </div>
@@ -176,21 +195,27 @@ export default function HomepageContent({ config }: HomepageContentProps) {
           <div className="absolute top-1/2 right-0 h-[400px] w-[500px] -translate-y-1/2 rounded-full bg-[#4DD9D0]/[0.05] blur-[100px]" />
         </div>
         <div className="relative z-10 mx-auto max-w-3xl">
-          <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#FFF2DB]/30">
-            {homepage.currentlyExploring.heading}
-          </p>
-          {homepage.currentlyExploring.domains.map((d) => (
+          <Editable path="homepage.currentlyExploring.heading" label="Exploring Heading">
+            <p className="mb-3 text-xs font-medium uppercase tracking-widest text-[#FFF2DB]/30">
+              {homepage.currentlyExploring.heading}
+            </p>
+          </Editable>
+          {homepage.currentlyExploring.domains.map((d, i) => (
             <Link
               key={d.id}
               href={d.href}
               className="group block rounded-2xl border border-[#FFF2DB]/5 bg-[#0a0a0a]/80 p-6 backdrop-blur-sm transition hover:border-[#4DD9D0]/20 hover:bg-[#111111]/80 sm:p-8"
             >
-              <h3 className="font-[family-name:var(--font-audiowide)] text-xl font-normal text-[#FFF2DB] sm:text-2xl">
-                {d.name}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-[#FFF2DB]/50 sm:text-base">
-                {d.description}
-              </p>
+              <Editable path={`homepage.currentlyExploring.domains[${i}].name`} label={`Domain ${i + 1} Name`}>
+                <h3 className="font-[family-name:var(--font-audiowide)] text-xl font-normal text-[#FFF2DB] sm:text-2xl">
+                  {d.name}
+                </h3>
+              </Editable>
+              <Editable path={`homepage.currentlyExploring.domains[${i}].description`} label={`Domain ${i + 1} Description`}>
+                <p className="mt-3 text-sm leading-relaxed text-[#FFF2DB]/50 sm:text-base">
+                  {d.description}
+                </p>
+              </Editable>
               <span className="mt-4 inline-block text-sm font-medium text-[#4DD9D0] transition group-hover:text-[#4DD9D0]">
                 Explore AI →
               </span>
@@ -202,12 +227,16 @@ export default function HomepageContent({ config }: HomepageContentProps) {
       {/* ── Gallery Preview ── */}
       <section className="relative px-5 py-20 sm:px-10">
         <div className="mx-auto max-w-3xl">
-          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
-            {homepage.galleryPreview.heading}
-          </h2>
-          <p className="mt-4 max-w-xl text-base text-[#FFF2DB]/50 sm:text-lg">
-            {homepage.galleryPreview.description}
-          </p>
+          <Editable path="homepage.galleryPreview.heading" label="Gallery Heading">
+            <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
+              {homepage.galleryPreview.heading}
+            </h2>
+          </Editable>
+          <Editable path="homepage.galleryPreview.description" label="Gallery Description">
+            <p className="mt-4 max-w-xl text-base text-[#FFF2DB]/50 sm:text-lg">
+              {homepage.galleryPreview.description}
+            </p>
+          </Editable>
 
           {/* empty state — abstract visual with subtle color */}
           <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-4">
@@ -233,12 +262,16 @@ export default function HomepageContent({ config }: HomepageContentProps) {
           <div className="absolute top-0 right-1/4 h-[300px] w-[300px] rounded-full bg-[#8B6CFF]/[0.04] blur-[80px]" />
         </div>
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center text-center">
-          <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
-            {homepage.priziaInvitation.heading}
-          </h2>
-          <p className="mt-3 text-base text-[#FFF2DB]/50 sm:text-lg">
-            {homepage.priziaInvitation.sub}
-          </p>
+          <Editable path="homepage.priziaInvitation.heading" label="Invitation Heading">
+            <h2 className="font-[family-name:var(--font-audiowide)] text-2xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-3xl">
+              {homepage.priziaInvitation.heading}
+            </h2>
+          </Editable>
+          <Editable path="homepage.priziaInvitation.sub" label="Invitation Subtext">
+            <p className="mt-3 text-base text-[#FFF2DB]/50 sm:text-lg">
+              {homepage.priziaInvitation.sub}
+            </p>
+          </Editable>
           <Link
             href="/prizia"
             className="mt-8 inline-flex items-center gap-2 rounded-full border border-[#F5A623]/30 bg-[#F5A623]/10 px-6 py-3 text-sm font-medium text-[#F5A623] transition hover:bg-[#F5A623]/20 hover:text-[#F5A623]"

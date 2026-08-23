@@ -9,7 +9,8 @@ export async function proxy(request: NextRequest) {
   if (
     pathname.startsWith("/studio/login") ||
     pathname === "/api/studio/auth/login" ||
-    pathname === "/api/studio/auth/logout"
+    pathname === "/api/studio/auth/logout" ||
+    pathname === "/api/studio/auth/check"
   ) {
     return NextResponse.next();
   }
