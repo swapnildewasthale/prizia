@@ -33,7 +33,7 @@ export function ShellHeader({ onMenuClick }: ShellHeaderProps) {
 
   return (
     <>
-      <header className="h-14 flex items-center justify-between px-4 lg:px-6 border-b border-[#FFF2DB]/5 bg-[#000000] shrink-0 z-30">
+      <header className="h-14 flex items-center justify-between px-4 lg:px-6 border-b border-[#FFF2DB]/5 bg-[#000000] shrink-0 z-50">
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}

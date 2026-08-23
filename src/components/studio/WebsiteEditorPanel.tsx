@@ -142,6 +142,28 @@ export default function WebsiteEditorPanel({ onBack }: WebsiteEditorPanelProps) 
           />
         )}
       </div>
+
+      <div className="border-t border-[#FFF2DB]/5 px-4 py-3">
+        <button
+          onClick={onBack}
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-[#FFF2DB]/10 bg-[#0a0a0a] px-4 py-2.5 text-xs font-medium text-[#FFF2DB]/70 transition hover:border-[#FFF2DB]/20 hover:text-[#FFF2DB]"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="h-3.5 w-3.5"
+          >
+            <path
+              d="M15 19l-7-7 7-7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Back to Menu
+        </button>
+      </div>
     </div>
   );
 }

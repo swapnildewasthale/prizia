@@ -28,6 +28,15 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  useEffect(() => {
+    if (authenticated && !isStudioRoute) {
+      document.body.setAttribute("data-shell", "true");
+      return () => {
+        document.body.removeAttribute("data-shell");
+      };
+    }
+  }, [authenticated, isStudioRoute]);
+
   if (isStudioRoute) {
     return <>{children}</>;
   }
@@ -72,10 +81,10 @@ function ShellInner({ children }: { children: React.ReactNode }) {
         {drawerOpen && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+              className="fixed inset-0 z-[60] bg-black/60 lg:hidden"
               onClick={() => setDrawerOpen(false)}
             />
-            <div className="fixed inset-y-0 left-0 z-50 w-72 bg-[#0a0a0a] border-r border-[#FFF2DB]/5 lg:hidden flex flex-col">
+            <div className="fixed inset-y-0 left-0 z-[70] w-72 bg-[#0a0a0a] border-r border-[#FFF2DB]/5 lg:hidden flex flex-col">
               <div className="flex items-center justify-between px-6 py-4 border-b border-[#FFF2DB]/5">
                 <span className="font-[family-name:var(--font-audiowide)] text-xs tracking-widest text-[#FFF2DB]/60">
                   PRIZMISTIC STUDIO
