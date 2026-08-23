@@ -7,16 +7,38 @@ import {
   useWebsiteEditor,
 } from "./WebsiteEditorContext";
 import { ShellHeader } from "./ShellHeader";
-import { ShellSidebar } from "./ShellSidebar";
+import { ShellSidebar, StudioWorkspace } from "./ShellSidebar";
 import WebsiteEditorPanel from "./WebsiteEditorPanel";
+import { UploadsPlaceholder } from "./UploadsPlaceholder";
+import { FormattingPlaceholder } from "./FormattingPlaceholder";
+import {
+  StudioProvider,
+  useStudio,
+} from "@/app/studio/components/StudioContext";
+import { PriziaOverview } from "@/app/studio/components/PriziaOverview";
+import { IdentitySection } from "@/app/studio/components/IdentitySection";
+import { BehaviorSection } from "@/app/studio/components/BehaviorSection";
+import { CommunicationSection } from "@/app/studio/components/CommunicationSection";
+import { KnowledgeSection } from "@/app/studio/components/KnowledgeSection";
+import { TestSection } from "@/app/studio/components/TestSection";
 
 const WEBSITE_ROUTES = ["/", "/about", "/explore", "/gallery"];
 
 function ShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { authenticated, activeField, setActiveField } = useWebsiteEditor();
+  const {
+    authenticated,
+    activeField,
+    setActiveField,
+    editMode,
+  } = useWebsiteEditor();
+  const {
+    activeSection: priziaSection,
+    setActiveSection: setPriziaSection,
+  } = useStudio();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [activeWorkspace, setActiveWorkspace] = useState<StudioWorkspace>(null);
 
   const isWebsiteRoute = WEBSITE_ROUTES.includes(pathname);
   const isStudioRoute = pathname.startsWith("/studio");
@@ -60,14 +82,19 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const sidebarContent =
-    isWebsiteRoute && activeField ? (
-      <WebsiteEditorPanel onBack={() => setActiveField(null)} />
-    ) : (
-      <ShellSidebar
-        onNavigate={() => setDrawerOpen(false)}
-      />
-    );
+  const showEditingPanel = isWebsiteRoute && editMode && activeField;
+
+  const sidebarContent = showEditingPanel ? (
+    <WebsiteEditorPanel onBack={() => setActiveField(null)} />
+  ) : (
+    <ShellSidebar
+      activeWorkspace={activeWorkspace}
+      onSelectWorkspace={setActiveWorkspace}
+      onNavigate={() => setDrawerOpen(false)}
+      priziaSection={priziaSection}
+      onSelectPriziaSection={setPriziaSection}
+    />
+  );
 
   return (
     <div className="h-screen flex flex-col bg-[#000000] font-[family-name:var(--font-comfortaa)] text-[#FFF2DB] overflow-hidden">
@@ -94,18 +121,8 @@ function ShellInner({ children }: { children: React.ReactNode }) {
                   className="p-2 -mr-2 text-[#FFF2DB]/40 hover:text-[#FFF2DB]/70 transition"
                   aria-label="Close menu"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-5 w-5"
-                  >
-                    <path
-                      d="M6 18L18 6M6 6l12 12"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+                    <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               </div>
@@ -116,7 +133,83 @@ function ShellInner({ children }: { children: React.ReactNode }) {
           </>
         )}
 
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          {activeWorkspace === "prizia" ? (
+            <PriziaWorkspace />
+          ) : activeWorkspace === "website" ? (
+            <div className="h-full">{children}</div>
+          ) : activeWorkspace === "uploads" ? (
+            <UploadsPlaceholder />
+          ) : activeWorkspace === "global-formatting" ? (
+            <FormattingPlaceholder />
+          ) : (
+            <WelcomePlaceholder />
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function PriziaWorkspace() {
+  const { activeSection, draft, updateDraft } = useStudio();
+
+  function renderSection() {
+    switch (activeSection) {
+      case "prizia-overview":
+        return <PriziaOverview />;
+      case "prizia-foundation":
+        return (
+          <IdentitySection
+            identity={draft.identity}
+            onChange={(identity) => updateDraft({ identity })}
+          />
+        );
+      case "prizia-behavior":
+        return (
+          <BehaviorSection
+            behavior={draft.behavior}
+            onChange={(behavior) => updateDraft({ behavior })}
+          />
+        );
+      case "prizia-communication":
+        return (
+          <CommunicationSection
+            communication={draft.communication}
+            onChange={(communication) => updateDraft({ communication })}
+          />
+        );
+      case "prizia-knowledge":
+        return (
+          <KnowledgeSection
+            knowledge={draft.knowledge}
+            onChange={(knowledge) => updateDraft({ knowledge })}
+          />
+        );
+      case "prizia-test":
+        return <TestSection config={draft} />;
+      default:
+        return <PriziaOverview />;
+    }
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-8">
+      {renderSection()}
+    </div>
+  );
+}
+
+function WelcomePlaceholder() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <h2 className="font-[family-name:var(--font-audiowide)] text-lg text-[#FFF2DB]/60 mb-2">
+          PRIZMISTIC STUDIO
+        </h2>
+        <p className="text-sm text-[#FFF2DB]/30">
+          Select a workspace from the sidebar to get started.
+        </p>
       </div>
     </div>
   );
@@ -136,7 +229,9 @@ export default function StudioShell({
 
   return (
     <WebsiteEditorProvider>
-      <ShellInner>{children}</ShellInner>
+      <StudioProvider>
+        <ShellInner>{children}</ShellInner>
+      </StudioProvider>
     </WebsiteEditorProvider>
   );
 }
