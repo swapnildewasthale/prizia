@@ -16,7 +16,7 @@ export default function NavBar({ nav }: NavBarProps) {
   const links = nav ?? site.nav;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-[#FFF2DB]/5">
+    <nav data-website-navbar="true" className="fixed top-0 left-0 right-0 z-[40] bg-[#000000]/90 backdrop-blur-md border-b border-[#FFF2DB]/5">
       {/* ── Desktop: 3-column grid for genuine centering ── */}
       <div className="mx-auto hidden max-w-7xl grid-cols-3 items-center px-6 py-4 sm:grid sm:px-12">
         {/* Left: Logo */}

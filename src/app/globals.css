@@ -125,3 +125,10 @@ body {
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
+
+/* --- Studio Shell: navbar containment --- */
+
+body[data-shell="true"] [data-website-navbar="true"] {
+  position: sticky;
+  top: 0;
+}
