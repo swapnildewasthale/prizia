@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export const config = {
-  matcher: ["/studio/:path*"],
+  matcher: ["/studio/:path*", "/api/studio/:path*"],
 };
 
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/studio/login")) {
+  const { pathname } = request.nextUrl;
+  if (
+    pathname.startsWith("/studio/login") ||
+    pathname === "/api/studio/auth/login" ||
+    pathname === "/api/studio/auth/logout"
+  ) {
     return NextResponse.next();
   }
 
