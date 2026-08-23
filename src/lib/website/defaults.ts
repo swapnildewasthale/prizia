@@ -75,6 +75,7 @@ export const defaultWebsiteConfig: WebsiteConfig = {
           description:
             "AI ko sirf samajhna nahi — uske saath experiment karna, use karna, aur dekhna ki wo kya-kya kar sakta hai.",
           href: "/explore",
+          ctaText: "Explore AI →",
         },
       ],
     },
@@ -83,10 +84,25 @@ export const defaultWebsiteConfig: WebsiteConfig = {
       description:
         "Abhi shuru ho raha hai. Jaise-jaise experiences honge, yahan unki visual memory banegi.",
       href: "/gallery",
+      ctaText: "Gallery →",
     },
     priziaInvitation: {
       heading: "Kuch poochna hai?",
       sub: "Prizia se pucho — Prizmistic ki intelligence.",
+      cta: {
+        text: "Prizia se baat karo",
+        href: "/prizia",
+      },
+    },
+    registration: {
+      label: "Free AI Experience",
+      heading: "AI को बनाइए अपना Personal Assistant",
+      subtitle: "Study  |  Job  |  Business  |  Life",
+      ctaText: "Book Your Free Experience",
+      ctaHref: "",
+      helpText: "Need help registering? Call us",
+      phoneDisplay: "+91 90392 02637",
+      phoneLink: "tel:+919039202637",
     },
   },
 };

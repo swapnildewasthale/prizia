@@ -13,6 +13,20 @@ function isKvConfigured(): boolean {
   return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 }
 
+function normalizeTextStyle(
+  stored: unknown,
+  fallback?: WebsiteConfig["homepage"]["hero"]["headlineStyle"],
+): WebsiteConfig["homepage"]["hero"]["headlineStyle"] {
+  if (!stored || typeof stored !== "object") return fallback;
+  const s = stored as Record<string, unknown>;
+  return {
+    alignment: s.alignment === "left" || s.alignment === "center" || s.alignment === "right"
+      ? s.alignment
+      : fallback?.alignment,
+    color: typeof s.color === "string" ? s.color : fallback?.color ?? null,
+  };
+}
+
 function normalizeNavLinks(
   stored: unknown,
   fallback: WebsiteConfig["nav"],
@@ -21,6 +35,7 @@ function normalizeNavLinks(
   return stored.map((item, i) => ({
     label: typeof item?.label === "string" ? item.label : fallback[i]?.label ?? "",
     href: typeof item?.href === "string" ? item.href : fallback[i]?.href ?? "",
+    visible: typeof item?.visible === "boolean" ? item.visible : fallback[i]?.visible ?? true,
   }));
 }
 
@@ -63,6 +78,10 @@ function normalizeHomepage(
       s.priziaInvitation,
       fallback.priziaInvitation,
     ),
+    registration: normalizeRegistration(
+      s.registration,
+      fallback.registration,
+    ),
   };
 }
 
@@ -75,6 +94,9 @@ function normalizeHero(
   return {
     headline: typeof s.headline === "string" ? s.headline : fallback.headline,
     sub: typeof s.sub === "string" ? s.sub : fallback.sub,
+    visible: typeof s.visible === "boolean" ? s.visible : fallback.visible ?? true,
+    headlineStyle: normalizeTextStyle(s.headlineStyle, fallback.headlineStyle),
+    subStyle: normalizeTextStyle(s.subStyle, fallback.subStyle),
   };
 }
 
@@ -87,6 +109,7 @@ function normalizePriziaEntry(
   return {
     label: typeof s.label === "string" ? s.label : fallback.label,
     placeholder: typeof s.placeholder === "string" ? s.placeholder : fallback.placeholder,
+    visible: typeof s.visible === "boolean" ? s.visible : fallback.visible ?? true,
   };
 }
 
@@ -104,6 +127,8 @@ function normalizeWhatIs(
             typeof p === "string" ? p : fallback.paragraphs[i] ?? "",
         )
       : fallback.paragraphs,
+    visible: typeof s.visible === "boolean" ? s.visible : fallback.visible ?? true,
+    headingStyle: normalizeTextStyle(s.headingStyle, fallback.headingStyle),
   };
 }
 
@@ -144,9 +169,11 @@ function normalizeCurrentlyExploring(
                 ? item.description
                 : fb?.description ?? "",
             href: typeof item?.href === "string" ? item.href : fb?.href ?? "",
+            ctaText: typeof item?.ctaText === "string" ? item.ctaText : fb?.ctaText ?? "Explore →",
           };
         })
       : fallback.domains,
+    visible: typeof s.visible === "boolean" ? s.visible : fallback.visible ?? true,
   };
 }
 
@@ -161,6 +188,9 @@ function normalizeGalleryPreview(
     description:
       typeof s.description === "string" ? s.description : fallback.description,
     href: typeof s.href === "string" ? s.href : fallback.href,
+    ctaText: typeof s.ctaText === "string" ? s.ctaText : fallback.ctaText ?? "Gallery →",
+    visible: typeof s.visible === "boolean" ? s.visible : fallback.visible ?? true,
+    headingStyle: normalizeTextStyle(s.headingStyle, fallback.headingStyle),
   };
 }
 
@@ -170,9 +200,66 @@ function normalizePriziaInvitation(
 ): WebsiteConfig["homepage"]["priziaInvitation"] {
   if (!stored || typeof stored !== "object") return fallback;
   const s = stored as Record<string, unknown>;
+  const fallbackCta = fallback.cta;
+  const sCta = s.cta as Record<string, unknown> | undefined;
+  const mergedCta = fallbackCta
+    ? {
+        text: typeof sCta?.text === "string" ? sCta.text : fallbackCta.text,
+        href: typeof sCta?.href === "string" ? sCta.href : fallbackCta.href,
+        visible: typeof sCta?.visible === "boolean" ? sCta.visible : fallbackCta.visible ?? true,
+        style: normalizeButtonStyle(sCta?.style, fallbackCta.style),
+      }
+    : sCta
+      ? {
+          text: typeof sCta.text === "string" ? sCta.text : "",
+          href: typeof sCta.href === "string" ? sCta.href : "",
+          visible: typeof sCta.visible === "boolean" ? sCta.visible : true,
+          style: normalizeButtonStyle(sCta.style, undefined),
+        }
+      : fallbackCta;
   return {
     heading: typeof s.heading === "string" ? s.heading : fallback.heading,
     sub: typeof s.sub === "string" ? s.sub : fallback.sub,
+    visible: typeof s.visible === "boolean" ? s.visible : fallback.visible ?? true,
+    headingStyle: normalizeTextStyle(s.headingStyle, fallback.headingStyle),
+    cta: mergedCta,
+  };
+}
+
+function normalizeButtonStyle(
+  stored: unknown,
+  fallback?: { bgColor?: string | null; textColor?: string | null },
+): { bgColor: string | null; textColor: string | null } {
+  if (!stored || typeof stored !== "object") {
+    return {
+      bgColor: fallback?.bgColor ?? null,
+      textColor: fallback?.textColor ?? null,
+    };
+  }
+  const s = stored as Record<string, unknown>;
+  return {
+    bgColor: typeof s.bgColor === "string" ? s.bgColor : fallback?.bgColor ?? null,
+    textColor: typeof s.textColor === "string" ? s.textColor : fallback?.textColor ?? null,
+  };
+}
+
+function normalizeRegistration(
+  stored: unknown,
+  fallback: WebsiteConfig["homepage"]["registration"],
+): WebsiteConfig["homepage"]["registration"] {
+  if (!stored || typeof stored !== "object") return fallback;
+  const s = stored as Record<string, unknown>;
+  return {
+    label: typeof s.label === "string" ? s.label : fallback.label,
+    heading: typeof s.heading === "string" ? s.heading : fallback.heading,
+    subtitle: typeof s.subtitle === "string" ? s.subtitle : fallback.subtitle,
+    ctaText: typeof s.ctaText === "string" ? s.ctaText : fallback.ctaText,
+    ctaHref: typeof s.ctaHref === "string" ? s.ctaHref : fallback.ctaHref,
+    helpText: typeof s.helpText === "string" ? s.helpText : fallback.helpText,
+    phoneDisplay: typeof s.phoneDisplay === "string" ? s.phoneDisplay : fallback.phoneDisplay,
+    phoneLink: typeof s.phoneLink === "string" ? s.phoneLink : fallback.phoneLink,
+    visible: typeof s.visible === "boolean" ? s.visible : fallback.visible ?? true,
+    ctaStyle: normalizeButtonStyle(s.ctaStyle, fallback.ctaStyle),
   };
 }
 

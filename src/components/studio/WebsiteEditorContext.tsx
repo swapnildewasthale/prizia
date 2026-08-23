@@ -10,6 +10,7 @@ import {
   ReactNode,
 } from "react";
 import { WebsiteConfig } from "@/lib/website/types";
+import { EditableProperty } from "@/lib/website/editableTypes";
 
 interface WebsiteEditorContextValue {
   authenticated: boolean;
@@ -17,8 +18,14 @@ interface WebsiteEditorContextValue {
   toggleEditMode: () => void;
   draft: WebsiteConfig | null;
   activeField: string | null;
-  setActiveField: (path: string | null) => void;
-  updateDraft: (path: string, value: string) => void;
+  activeFieldLabel: string | null;
+  activeFieldSupports: EditableProperty[];
+  setActiveField: (
+    path: string | null,
+    label?: string | null,
+    supports?: EditableProperty[],
+  ) => void;
+  updateDraft: (path: string, value: unknown) => void;
   saveDraft: () => Promise<void>;
   publishDraft: () => Promise<void>;
   saving: boolean;
@@ -31,12 +38,16 @@ interface WebsiteEditorContextValue {
   setShowLogoutConfirm: (show: boolean) => void;
 }
 
-const WebsiteEditorContext = createContext<WebsiteEditorContextValue | null>(null);
+const WebsiteEditorContext = createContext<WebsiteEditorContextValue | null>(
+  null,
+);
 
 export function useWebsiteEditor() {
   const ctx = useContext(WebsiteEditorContext);
   if (!ctx)
-    throw new Error("useWebsiteEditor must be used within WebsiteEditorProvider");
+    throw new Error(
+      "useWebsiteEditor must be used within WebsiteEditorProvider",
+    );
   return ctx;
 }
 
@@ -76,7 +87,11 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
   const [editMode, setEditMode] = useState(true);
   const [draft, setDraft] = useState<WebsiteConfig | null>(null);
-  const [activeField, setActiveField] = useState<string | null>(null);
+  const [activeField, setActiveFieldState] = useState<string | null>(null);
+  const [activeFieldLabel, setActiveFieldLabel] = useState<string | null>(null);
+  const [activeFieldSupports, setActiveFieldSupports] = useState<
+    EditableProperty[]
+  >(["content"]);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -125,12 +140,29 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
 
   const toggleEditMode = useCallback(() => {
     setEditMode((prev) => {
-      if (prev) setActiveField(null);
+      if (prev) {
+        setActiveFieldState(null);
+        setActiveFieldLabel(null);
+        setActiveFieldSupports(["content"]);
+      }
       return !prev;
     });
   }, []);
 
-  const updateDraft = useCallback((path: string, value: string) => {
+  const setActiveField = useCallback(
+    (
+      path: string | null,
+      label: string | null = null,
+      supports: EditableProperty[] = ["content"],
+    ) => {
+      setActiveFieldState(path);
+      setActiveFieldLabel(label);
+      setActiveFieldSupports(supports);
+    },
+    [],
+  );
+
+  const updateDraft = useCallback((path: string, value: unknown) => {
     setDraft((prev) => {
       if (!prev) return prev;
       return setByPath(prev, path, value) as WebsiteConfig;
@@ -192,7 +224,9 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       setAuthenticated(false);
       setEditMode(false);
       setDraft(null);
-      setActiveField(null);
+      setActiveFieldState(null);
+      setActiveFieldLabel(null);
+      setActiveFieldSupports(["content"]);
       setHasChanges(false);
       setShowLogoutConfirm(false);
     }
@@ -205,6 +239,8 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       toggleEditMode,
       draft,
       activeField,
+      activeFieldLabel,
+      activeFieldSupports,
       setActiveField,
       updateDraft,
       saveDraft,
@@ -224,6 +260,9 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       toggleEditMode,
       draft,
       activeField,
+      activeFieldLabel,
+      activeFieldSupports,
+      setActiveField,
       updateDraft,
       saveDraft,
       publishDraft,

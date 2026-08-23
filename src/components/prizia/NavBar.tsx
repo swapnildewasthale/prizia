@@ -5,6 +5,8 @@ import { useState } from "react";
 import { site } from "@/content/prizmistic/site";
 import { WebsiteConfig } from "@/lib/website/types";
 import { useFormModal } from "./FormModalContext";
+import Editable from "@/components/prizia/Editable";
+import { useWebsiteEditor } from "@/components/studio/WebsiteEditorContext";
 
 interface NavBarProps {
   nav?: WebsiteConfig["nav"];
@@ -14,6 +16,7 @@ export default function NavBar({ nav }: NavBarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openForm } = useFormModal();
   const links = nav ?? site.nav;
+  const editor = useWebsiteEditor();
 
   return (
     <nav data-website-navbar="true" className="fixed top-0 left-0 right-0 z-[40] bg-[#000000]/90 backdrop-blur-md border-b border-[#FFF2DB]/5">
@@ -30,15 +33,25 @@ export default function NavBar({ nav }: NavBarProps) {
 
         {/* Center: Navigation links (genuinely centered via grid) */}
         <div className="flex justify-center gap-8">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-[#FFF2DB]/50 transition hover:text-[#FFF2DB]"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {links.map((link, i) => {
+            const isVisible = editor?.editMode || (link as WebsiteConfig["nav"][0]).visible !== false;
+            if (!isVisible) return null;
+            return (
+              <Editable
+                key={link.href}
+                path={`nav[${i}].label`}
+                label={`Nav ${i + 1}`}
+                supports={["content", "link", "visible"]}
+              >
+                <Link
+                  href={link.href}
+                  className="text-sm font-medium text-[#FFF2DB]/50 transition hover:text-[#FFF2DB]"
+                >
+                  {link.label}
+                </Link>
+              </Editable>
+            );
+          })}
         </div>
 
         {/* Right: CTA buttons */}
@@ -82,16 +95,20 @@ export default function NavBar({ nav }: NavBarProps) {
       {/* ── Mobile Menu ── */}
       {isMenuOpen && (
         <div className="border-t border-[#FFF2DB]/5 px-6 py-4 sm:hidden">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="block py-2 text-sm font-medium text-[#FFF2DB]/50 transition hover:text-[#FFF2DB]"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {links.map((link) => {
+            const isVisible = editor?.editMode || (link as WebsiteConfig["nav"][0]).visible !== false;
+            if (!isVisible) return null;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block py-2 text-sm font-medium text-[#FFF2DB]/50 transition hover:text-[#FFF2DB]"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
 
           {/* Mobile CTAs */}
           <div className="mt-3 flex flex-col gap-2 border-t border-[#FFF2DB]/5 pt-3">

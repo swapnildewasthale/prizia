@@ -1,14 +1,21 @@
 "use client";
 
 import { useWebsiteEditor } from "@/components/studio/WebsiteEditorContext";
+import { EditableProperty } from "@/lib/website/editableTypes";
 
 interface EditableProps {
   path: string;
   label: string;
   children: React.ReactNode;
+  supports?: EditableProperty[];
 }
 
-export default function Editable({ path, label, children }: EditableProps) {
+export default function Editable({
+  path,
+  label,
+  children,
+  supports = ["content"],
+}: EditableProps) {
   const editor = useWebsiteEditor();
 
   if (!editor?.editMode) {
@@ -17,13 +24,19 @@ export default function Editable({ path, label, children }: EditableProps) {
 
   const isActive = editor.activeField === path;
 
+  function handleClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (isActive) {
+      editor.setActiveField(null);
+    } else {
+      editor.setActiveField(path, label, supports);
+    }
+  }
+
   return (
     <span
       data-editable={path}
-      onClick={(e) => {
-        e.stopPropagation();
-        editor.setActiveField(isActive ? null : path);
-      }}
+      onClick={handleClick}
       className="relative cursor-pointer rounded-sm transition"
       style={{
         outline: isActive
