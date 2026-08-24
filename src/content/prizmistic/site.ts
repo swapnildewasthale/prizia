@@ -5,6 +5,7 @@ export const site = {
     "Ek aisi jagah jahan ideas ko sirf socha nahi jaata — unhe try bhi kiya jaata hai.",
   nav: [
     { label: "Home", href: "/" },
+    { label: "PRIZM", href: "/prizm" },
     { label: "About", href: "/about" },
     { label: "Explore", href: "/explore" },
     { label: "Gallery", href: "/gallery" },

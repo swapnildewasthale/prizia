@@ -9,6 +9,7 @@ export const defaultWebsiteConfig: WebsiteConfig = {
   },
   nav: [
     { label: "Home", href: "/" },
+    { label: "PRIZM", href: "/prizm" },
     { label: "About", href: "/about" },
     { label: "Explore", href: "/explore" },
     { label: "Gallery", href: "/gallery" },

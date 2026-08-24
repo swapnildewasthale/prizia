@@ -45,6 +45,22 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes prism-pulse {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(139, 108, 255, 0.3)) drop-shadow(0 0 40px rgba(77, 217, 208, 0.15)); }
+  50% { filter: drop-shadow(0 0 35px rgba(139, 108, 255, 0.5)) drop-shadow(0 0 60px rgba(77, 217, 208, 0.25)); }
+}
+
+@keyframes prism-ray {
+  0% { width: 0; opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { width: 80px; opacity: 0; }
+}
+
+@keyframes branch-appear {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* --- Utility Classes --- */
 
 .animate-fade-in {
@@ -65,6 +81,18 @@
 
 .animate-prizia-respond {
   animation: prizia-respond 1.2s ease-in-out infinite;
+}
+
+.animate-prism-pulse {
+  animation: prism-pulse 2s ease-in-out infinite;
+}
+
+.animate-prism-ray {
+  animation: prism-ray 1.2s ease-out both;
+}
+
+.animate-branch-appear {
+  animation: branch-appear 0.4s ease-out both;
 }
 
 /* --- Base --- */
