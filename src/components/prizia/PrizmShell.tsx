@@ -1,7 +1,7 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import NavBar from "./NavBar";
+import Link from "next/link";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface Branch {
   id: string;
@@ -23,6 +23,10 @@ const categories = [
   "Surprise Me",
 ];
 
+const rayAngles = [-32, -14, 4, 20, 36];
+
+const rayColors = ["#8B6CFF", "#4DD9D0", "#F5A623", "#8B6CFF", "#4DD9D0"];
+
 export default function PrizmShell() {
   const [input, setInput] = useState("");
   const [phase, setPhase] = useState<Phase>("input");
@@ -32,18 +36,12 @@ export default function PrizmShell() {
   const [isExploring, setIsExploring] = useState(false);
   const [originalInput, setOriginalInput] = useState("");
   const [error, setError] = useState("");
+  const [hoveredBranch, setHoveredBranch] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const exploringRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (phase === "exploring" && exploringRef.current) {
-      exploringRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [phase, exploration]);
+    if (phase === "input") inputRef.current?.focus();
+  }, [phase]);
 
   const handleSplit = useCallback(
     async (value: string) => {
@@ -54,11 +52,9 @@ export default function PrizmShell() {
       setOriginalInput(trimmed);
       setPhase("entering");
 
-      // Phase 1: input travels toward prism
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 900));
       setPhase("splitting");
 
-      // Phase 2: prism splits
       try {
         const res = await fetch("/api/prizm", {
           method: "POST",
@@ -72,9 +68,7 @@ export default function PrizmShell() {
         }
 
         const data = await res.json();
-
-        // Small delay for visual effect after branches are computed
-        await new Promise((r) => setTimeout(r, 600));
+        await new Promise((r) => setTimeout(r, 700));
         setBranches(data.branches);
         setPhase("branches");
       } catch (err) {
@@ -105,16 +99,11 @@ export default function PrizmShell() {
           }),
         });
 
-        if (!res.ok) {
-          throw new Error("Failed to explore this perspective");
-        }
-
+        if (!res.ok) throw new Error("Failed to explore this perspective");
         const data = await res.json();
         setExploration(data.text);
       } catch {
-        setExploration(
-          "This perspective couldn't be explored right now. Try again."
-        );
+        setExploration("This perspective couldn't be explored right now. Try again.");
       } finally {
         setIsExploring(false);
       }
@@ -158,6 +147,7 @@ export default function PrizmShell() {
     setOriginalInput("");
     setInput("");
     setError("");
+    setHoveredBranch(null);
   };
 
   const handleBackToBranches = () => {
@@ -166,79 +156,131 @@ export default function PrizmShell() {
     setExploration("");
   };
 
-  return (
-    <div className="min-h-screen overflow-hidden bg-[#000000] font-[family-name:var(--font-comfortaa)] text-[#FFF2DB]">
-      <NavBar />
+  const showPrism = phase !== "input";
+  const showRays = phase === "branches" || phase === "exploring";
 
-      <main className="relative flex min-h-[calc(100vh-112px)] items-center justify-center px-5 pb-24 pt-28 sm:px-10">
-        {/* Atmospheric glows */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#8B6CFF]/[0.06] blur-[120px]" />
-          <div className="absolute bottom-1/3 right-1/3 h-[300px] w-[300px] rounded-full bg-[#4DD9D0]/[0.04] blur-[80px]" />
-          <div className="absolute top-1/2 left-1/4 h-[200px] w-[250px] rounded-full bg-[#F5A623]/[0.03] blur-[90px]" />
+  const displayInput = phase === "input" ? input : originalInput;
+
+  const parsedExploration = useMemo(() => {
+    if (!exploration) return { main: [] as string[], related: [] as string[] };
+    const parts = exploration.split("\n\n");
+    const main: string[] = [];
+    const related: string[] = [];
+
+    for (const part of parts) {
+      if (part.trim().startsWith("Related directions:")) {
+        const lines = part.trim().split("\n").slice(1);
+        for (const line of lines) {
+          const cleaned = line.replace(/^-\s*/, "").trim();
+          if (cleaned) related.push(cleaned);
+        }
+      } else {
+        main.push(part);
+      }
+    }
+    return { main, related };
+  }, [exploration]);
+
+  return (
+    <div className="prizm-canvas fixed inset-0 z-50 overflow-hidden bg-[#0a0a0a] font-[family-name:var(--font-comfortaa)] text-[#FFF2DB]">
+      {/* Atmospheric background */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute top-1/3 left-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#8B6CFF]/[0.03] blur-[150px]" />
+        <div className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-[#4DD9D0]/[0.02] blur-[100px]" />
+      </div>
+
+      {/* ── TOP BAR ── */}
+      <header className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-5 sm:px-10">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="font-[family-name:var(--font-audiowide)] text-sm tracking-tight text-[#FFF2DB]/40 transition hover:text-[#FFF2DB]/70"
+          >
+            PRIZM
+          </Link>
         </div>
 
-        {/* ── INPUT PHASE ── */}
-        {phase === "input" && (
-          <section className="relative z-10 flex w-full max-w-3xl flex-col items-center text-center">
-            <h1 className="font-[family-name:var(--font-audiowide)] text-5xl font-normal tracking-[-0.055em] text-[#FFF2DB] sm:text-7xl">
-              PRIZM
-            </h1>
+        <h1 className="font-[family-name:var(--font-audiowide)] text-xs sm:text-sm tracking-[0.2em] uppercase">
+          <span className="text-[#F5A623]/70">Put it through</span>{" "}
+          <span className="text-[#8B6CFF]/70">the</span>{" "}
+          <span className="text-[#4DD9D0]/70">Prism</span>
+        </h1>
 
-            {/* Prism SVG */}
-            <div className="my-8 sm:my-10" aria-hidden="true">
-              <svg width="120" height="140" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div className="flex items-center gap-4">
+          {phase !== "input" && (
+            <button
+              onClick={handleReset}
+              className="text-xs text-[#FFF2DB]/30 transition hover:text-[#FFF2DB]/60"
+            >
+              New PRIZM
+            </button>
+          )}
+          <Link
+            href="/"
+            className="text-xs text-[#FFF2DB]/20 transition hover:text-[#FFF2DB]/50"
+          >
+            Exit
+          </Link>
+        </div>
+      </header>
+
+      {/* ── MAIN SCENE ── */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {/* ═══ INPUT STATE ═══ */}
+        {phase === "input" && (
+          <div className="relative flex w-full max-w-5xl flex-col items-center px-6">
+            {/* Tagline */}
+            <p className="mb-10 text-center text-lg font-medium text-[#FFF2DB]/50 sm:text-2xl">
+              See one thing. Discover what&apos;s inside it.
+            </p>
+
+            {/* Categories */}
+            <div className="mb-12 flex flex-wrap justify-center gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => handleCategory(cat)}
+                  className="rounded-full border border-[#FFF2DB]/10 bg-transparent px-4 py-2 text-xs font-medium text-[#FFF2DB]/40 transition hover:border-[#F5A623]/30 hover:text-[#F5A623] sm:text-sm"
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Central prism — waiting for input */}
+            <div className="relative mb-10" aria-hidden="true">
+              <svg
+                width="280"
+                height="320"
+                viewBox="0 0 280 320"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="opacity-30"
+              >
                 <defs>
-                  <linearGradient id="prismGrad" x1="60" y1="0" x2="60" y2="140" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#8B6CFF" stopOpacity="0.6" />
-                    <stop offset="50%" stopColor="#4DD9D0" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#F5A623" stopOpacity="0.6" />
+                  <linearGradient id="prismIdle" x1="140" y1="0" x2="140" y2="320" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#8B6CFF" stopOpacity="0.5" />
+                    <stop offset="50%" stopColor="#4DD9D0" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#F5A623" stopOpacity="0.5" />
                   </linearGradient>
-                  <filter id="prismGlow">
-                    <feGaussianBlur stdDeviation="8" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
                 </defs>
-                {/* Glow layer */}
                 <polygon
-                  points="60,8 108,110 12,110"
-                  fill="url(#prismGrad)"
-                  opacity="0.3"
-                  filter="url(#prismGlow)"
-                />
-                {/* Main prism */}
-                <polygon
-                  points="60,8 108,110 12,110"
+                  points="140,10 270,280 10,280"
                   fill="none"
-                  stroke="url(#prismGrad)"
-                  strokeWidth="2"
+                  stroke="url(#prismIdle)"
+                  strokeWidth="1.5"
                 />
                 <polygon
-                  points="60,8 108,110 12,110"
-                  fill="url(#prismGrad)"
-                  opacity="0.1"
-                />
-                {/* Inner highlight */}
-                <polygon
-                  points="60,22 96,104 24,104"
-                  fill="none"
-                  stroke="#FFF2DB"
-                  strokeWidth="0.5"
-                  opacity="0.15"
+                  points="140,10 270,280 10,280"
+                  fill="url(#prismIdle)"
+                  opacity="0.05"
                 />
               </svg>
             </div>
 
-            <p className="mb-8 max-w-md text-lg font-medium leading-relaxed text-[#FFF2DB]/60 sm:text-xl">
-              See one thing. Discover what&apos;s inside it.
-            </p>
-
-            {/* Input */}
+            {/* Input — positioned below prism like reference */}
             <form onSubmit={handleSubmit} className="w-full max-w-xl">
-              <div className="flex items-center rounded-[1.35rem] border border-[#FFF2DB]/10 bg-[#111111] p-1.5 shadow-[0_16px_45px_rgba(0,0,0,0.4)]">
+              <div className="relative">
                 <label htmlFor="prizm-input" className="sr-only">
                   Enter anything to put through the PRIZM
                 </label>
@@ -248,276 +290,313 @@ export default function PrizmShell() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Enter anything..."
-                  className="prizia-input min-w-0 flex-1 bg-transparent px-4 py-3 text-base font-medium text-[#FFF2DB] placeholder:text-[#FFF2DB]/25 focus:outline-none sm:px-5"
+                  className="prizia-input w-full bg-transparent py-3 text-center text-lg font-medium text-[#FFF2DB] placeholder:text-[#FFF2DB]/20 focus:outline-none sm:text-xl"
                 />
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-[#FFF2DB]/20 to-transparent" />
+              </div>
+              {error && (
+                <p className="mt-3 text-center text-sm text-red-400">{error}</p>
+              )}
+              <div className="mt-6 flex justify-center">
                 <button
                   type="submit"
                   disabled={!input.trim()}
-                  className="shrink-0 rounded-full bg-[#F5A623] px-5 py-2.5 text-sm font-semibold text-[#000000] transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623]"
+                  className="rounded-full border border-[#FFF2DB]/15 bg-[#FFF2DB]/5 px-8 py-3 text-sm font-medium text-[#FFF2DB]/70 transition hover:border-[#F5A623]/30 hover:bg-[#F5A623]/10 hover:text-[#F5A623] disabled:cursor-not-allowed disabled:opacity-30 sm:text-base"
                 >
                   Prizm It
                 </button>
               </div>
             </form>
-
-            {error && (
-              <p className="mt-4 text-sm text-red-400">{error}</p>
-            )}
-
-            {/* Categories */}
-            <div className="mt-8 flex flex-wrap justify-center gap-2.5 sm:mt-10">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => handleCategory(cat)}
-                  className="rounded-full border border-[#FFF2DB]/10 bg-[#0d0d0d] px-4 py-2.5 text-sm font-normal text-[#FFF2DB]/60 transition hover:border-[#F5A623]/40 hover:bg-[#111111] hover:text-[#F5A623] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623]"
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </section>
+          </div>
         )}
 
-        {/* ── ENTERING / SPLITTING PHASE ── */}
-        {(phase === "entering" || phase === "splitting") && (
-          <section className="relative z-10 flex flex-col items-center text-center">
-            {/* Prism with animation */}
-            <div className="relative">
-              <div
-                className={`transition-all duration-700 ease-in-out ${
-                  phase === "entering"
-                    ? "scale-110 opacity-100"
-                    : "scale-125 opacity-100"
-                }`}
+        {/* ═══ ENTERING / SPLITTING / BRANCHES / EXPLORING — THE PRISM SCENE ═══ */}
+        {showPrism && (
+          <div className="relative flex h-full w-full max-w-6xl items-center justify-center px-6">
+            {/* THE PRISM — large, centered, always visible */}
+            <div
+              className={`absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ease-out ${
+                phase === "entering"
+                  ? "scale-100 opacity-100"
+                  : phase === "splitting"
+                    ? "scale-105 opacity-100"
+                    : phase === "exploring"
+                      ? "scale-75 opacity-40"
+                      : "scale-100 opacity-100"
+              }`}
+            >
+              <svg
+                width="360"
+                height="420"
+                viewBox="0 0 280 320"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className={
+                  phase === "splitting" || phase === "branches"
+                    ? "animate-prism-glow"
+                    : ""
+                }
               >
-                <svg width="160" height="186" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg" className="animate-prism-pulse">
-                  <defs>
-                    <linearGradient id="prismGradActive" x1="60" y1="0" x2="60" y2="140" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="#8B6CFF" stopOpacity="0.9" />
-                      <stop offset="50%" stopColor="#4DD9D0" stopOpacity="0.7" />
-                      <stop offset="100%" stopColor="#F5A623" stopOpacity="0.9" />
-                    </linearGradient>
-                    <filter id="prismGlowActive">
-                      <feGaussianBlur stdDeviation="12" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  <polygon points="60,8 108,110 12,110" fill="url(#prismGradActive)" opacity="0.4" filter="url(#prismGlowActive)" />
-                  <polygon points="60,8 108,110 12,110" fill="none" stroke="url(#prismGradActive)" strokeWidth="2.5" />
-                  <polygon points="60,8 108,110 12,110" fill="url(#prismGradActive)" opacity="0.15" />
-                  <polygon points="60,22 96,104 24,104" fill="none" stroke="#FFF2DB" strokeWidth="0.5" opacity="0.25" />
-                </svg>
-              </div>
-
-              {/* Traveling input text */}
-              <div
-                className={`absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#FFF2DB] px-4 py-1.5 text-sm font-semibold text-[#000000] shadow-lg transition-all duration-700 ease-in-out ${
-                  phase === "entering"
-                    ? "-top-8 opacity-100"
-                    : "top-1/2 -translate-y-1/2 scale-0 opacity-0"
-                }`}
-              >
-                {originalInput.length > 40
-                  ? originalInput.slice(0, 40) + "…"
-                  : originalInput}
-              </div>
-
-              {/* Splitting rays */}
-              {phase === "splitting" && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute h-1 w-16 origin-left rounded-full animate-prism-ray"
-                      style={{
-                        background: ["#8B6CFF", "#4DD9D0", "#F5A623", "#8B6CFF", "#4DD9D0"][i],
-                        transform: `rotate(${(i - 2) * 25}deg)`,
-                        animationDelay: `${i * 0.1}s`,
-                        opacity: 0.7,
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <p className="mt-8 text-sm text-[#FFF2DB]/40">
-              {phase === "entering"
-                ? "Putting it through the PRIZM..."
-                : "Splitting into perspectives..."}
-            </p>
-          </section>
-        )}
-
-        {/* ── BRANCHES PHASE ── */}
-        {phase === "branches" && (
-          <section className="relative z-10 flex w-full max-w-4xl flex-col items-center text-center">
-            {/* Prism small at center */}
-            <div className="mb-2" aria-hidden="true">
-              <svg width="60" height="70" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                  <linearGradient id="prismGradSmall" x1="60" y1="0" x2="60" y2="140" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#8B6CFF" stopOpacity="0.5" />
-                    <stop offset="100%" stopColor="#F5A623" stopOpacity="0.5" />
+                  <linearGradient
+                    id="prismActive"
+                    x1="140"
+                    y1="0"
+                    x2="140"
+                    y2="320"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop offset="0%" stopColor="#8B6CFF" stopOpacity="0.7" />
+                    <stop offset="50%" stopColor="#4DD9D0" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="#F5A623" stopOpacity="0.7" />
                   </linearGradient>
+                  <filter id="glowFilter">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
                 </defs>
-                <polygon points="60,8 108,110 12,110" fill="url(#prismGradSmall)" opacity="0.15" />
-                <polygon points="60,8 108,110 12,110" fill="none" stroke="url(#prismGradSmall)" strokeWidth="1.5" />
+                {/* Glow fill */}
+                <polygon
+                  points="140,10 270,280 10,280"
+                  fill="url(#prismActive)"
+                  opacity={phase === "splitting" || phase === "branches" ? "0.08" : "0.03"}
+                  filter="url(#glowFilter)"
+                />
+                {/* Main outline */}
+                <polygon
+                  points="140,10 270,280 10,280"
+                  fill="none"
+                  stroke="url(#prismActive)"
+                  strokeWidth={phase === "splitting" || phase === "branches" ? "2" : "1.5"}
+                />
+                {/* Inner triangle */}
+                <polygon
+                  points="140,40 245,260 35,260"
+                  fill="none"
+                  stroke="#FFF2DB"
+                  strokeWidth="0.5"
+                  opacity="0.08"
+                />
               </svg>
             </div>
 
-            <p className="mb-1 max-w-lg text-sm text-[#FFF2DB]/40">
-              &ldquo;{originalInput.length > 80 ? originalInput.slice(0, 80) + "…" : originalInput}&rdquo;
-            </p>
-            <h2 className="mb-8 font-[family-name:var(--font-audiowide)] text-xl font-normal tracking-[-0.03em] text-[#FFF2DB] sm:text-2xl">
-              {branches.length} perspectives emerged
-            </h2>
-
-            {/* Branches radiating from center */}
-            <div className="flex flex-col gap-3 w-full max-w-lg sm:max-w-xl">
-              {branches.map((branch, i) => (
-                <button
-                  key={branch.id}
-                  onClick={() => handleExplore(branch)}
-                  className="group flex items-center gap-4 rounded-2xl border border-[#FFF2DB]/8 bg-[#0d0d0d]/80 px-5 py-4 text-left transition hover:border-[#F5A623]/30 hover:bg-[#111111] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623] animate-branch-appear"
-                  style={{ animationDelay: `${i * 0.1}s` }}
-                >
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-[#000000]"
-                    style={{
-                      background: ["#8B6CFF", "#4DD9D0", "#F5A623", "#8B6CFF", "#4DD9D0"][i],
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-                  <span className="flex-1">
-                    <span className="text-base font-medium text-[#FFF2DB] transition group-hover:text-[#F5A623]">
-                      {branch.label}
-                    </span>
-                  </span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4 shrink-0 text-[#FFF2DB]/20 transition group-hover:text-[#F5A623]"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-
-            {/* Start over */}
-            <button
-              onClick={handleReset}
-              className="mt-8 rounded-full border border-[#FFF2DB]/10 bg-transparent px-5 py-2.5 text-sm font-medium text-[#FFF2DB]/50 transition hover:border-[#FFF2DB]/20 hover:text-[#FFF2DB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623]"
-            >
-              ← Start a new PRIZM
-            </button>
-          </section>
-        )}
-
-        {/* ── EXPLORING PHASE ── */}
-        {phase === "exploring" && selectedBranch && (
-          <section ref={exploringRef} className="relative z-10 flex w-full max-w-3xl flex-col">
-            {/* Header */}
-            <div className="mb-8 flex items-center gap-4">
-              <button
-                onClick={handleBackToBranches}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#FFF2DB]/10 transition hover:border-[#FFF2DB]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623]"
-                aria-label="Back to all branches"
+            {/* ── INPUT LABEL (left side, connected to prism) ── */}
+            {(phase === "entering" || phase === "splitting" || phase === "branches") && (
+              <div
+                className={`absolute left-6 top-1/2 z-20 -translate-y-1/2 transition-all duration-700 ease-out sm:left-16 ${
+                  phase === "entering"
+                    ? "opacity-100"
+                    : phase === "splitting"
+                      ? "opacity-60"
+                      : "opacity-40"
+                }`}
               >
-                <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#FFF2DB]/60" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs text-[#FFF2DB]/30">
-                  &ldquo;{originalInput.length > 60 ? originalInput.slice(0, 60) + "…" : originalInput}&rdquo;
+                <p className="max-w-[180px] text-sm font-medium text-[#FFF2DB]/70 sm:max-w-[240px] sm:text-base">
+                  {displayInput.length > 50
+                    ? displayInput.slice(0, 50) + "…"
+                    : displayInput}
                 </p>
-                <h2 className="truncate font-[family-name:var(--font-audiowide)] text-lg font-normal text-[#FFF2DB] sm:text-xl">
-                  {selectedBranch.label}
-                </h2>
+                <div className="mt-2 h-px w-full max-w-[200px] bg-gradient-to-r from-[#FFF2DB]/30 to-transparent" />
               </div>
-              <button
-                onClick={handleReset}
-                className="shrink-0 rounded-full border border-[#FFF2DB]/10 bg-transparent px-4 py-2 text-xs font-medium text-[#FFF2DB]/50 transition hover:border-[#FFF2DB]/20 hover:text-[#FFF2DB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623]"
-              >
-                New PRIZM
-              </button>
-            </div>
+            )}
 
-            {/* Exploration content */}
-            <div className="rounded-2xl border border-[#FFF2DB]/5 bg-[#0d0d0d]/80 p-6 sm:p-8">
-              {isExploring ? (
-                <div className="flex flex-col items-center gap-3 py-12">
-                  <div className="flex gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-[#8B6CFF] animate-prizia-pulse" style={{ animationDelay: "0s" }} />
-                    <span className="h-2 w-2 rounded-full bg-[#4DD9D0] animate-prizia-pulse" style={{ animationDelay: "0.2s" }} />
-                    <span className="h-2 w-2 rounded-full bg-[#F5A623] animate-prizia-pulse" style={{ animationDelay: "0.4s" }} />
-                  </div>
-                  <p className="text-sm text-[#FFF2DB]/30">Exploring this perspective...</p>
+            {/* Input label for exploring state — top left */}
+            {phase === "exploring" && selectedBranch && (
+              <div className="absolute left-6 top-20 z-20 sm:left-16">
+                <p className="max-w-[200px] text-xs text-[#FFF2DB]/30 sm:max-w-[280px]">
+                  {displayInput.length > 60
+                    ? displayInput.slice(0, 60) + "…"
+                    : displayInput}
+                </p>
+              </div>
+            )}
+
+            {/* ── RAYS / PERSPECTIVES emerging from prism ── */}
+            {showRays && (
+              <div className="absolute left-1/2 top-1/2 z-20 -translate-y-1/2">
+                {/* Ray lines and labels positioned from right edge of prism */}
+                {branches.map((branch, i) => {
+                  const angle = rayAngles[i] ?? (i - 2) * 18;
+                  const color = rayColors[i] ?? "#FFF2DB";
+                  const isSelected = selectedBranch?.id === branch.id;
+                  const isHovered = hoveredBranch === branch.id;
+                  const otherDimmed =
+                    phase === "exploring" && !isSelected && !isHovered;
+
+                  return (
+                    <button
+                      key={branch.id}
+                      onClick={() => handleExplore(branch)}
+                      onMouseEnter={() => setHoveredBranch(branch.id)}
+                      onMouseLeave={() => setHoveredBranch(null)}
+                      className={`group absolute z-20 animate-ray-extend ${
+                        otherDimmed ? "opacity-20" : "opacity-100"
+                      } transition-opacity duration-300`}
+                      style={{
+                        left: "180px",
+                        top: "140px",
+                        transformOrigin: "0 0",
+                        transform: `rotate(${angle}deg)`,
+                        animationDelay: `${i * 0.15}s`,
+                      }}
+                    >
+                      {/* Ray line */}
+                      <div
+                        className="absolute top-0 left-0 h-px origin-left transition-all duration-300"
+                        style={{
+                          width: isSelected || isHovered ? "220px" : "180px",
+                          background: `linear-gradient(90deg, ${color}40, ${color}${isSelected || isHovered ? "cc" : "60"})`,
+                          transform: `rotate(0deg)`,
+                        }}
+                      />
+                      {/* Label */}
+                      <div
+                        className="absolute top-[-8px] transition-all duration-300"
+                        style={{
+                          left: isSelected || isHovered ? "210px" : "170px",
+                          transform: `rotate(${-angle}deg)`,
+                          transformOrigin: "left center",
+                        }}
+                      >
+                        <span
+                          className={`whitespace-nowrap text-sm font-medium transition-all duration-300 sm:text-base ${
+                            isSelected
+                              ? "text-[#FFF2DB]"
+                              : isHovered
+                                ? "text-[#FFF2DB]/90"
+                                : "text-[#FFF2DB]/50"
+                          }`}
+                          style={{
+                            textShadow: isSelected || isHovered
+                              ? `0 0 20px ${color}40`
+                              : "none",
+                          }}
+                        >
+                          {branch.label}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── ENTERING INPUT TRAVELING ── */}
+            {phase === "entering" && (
+              <div className="absolute left-6 top-1/2 z-30 -translate-y-1/2 animate-input-travel sm:left-16">
+                <p className="max-w-[200px] text-sm font-medium text-[#FFF2DB]/80 sm:max-w-[280px] sm:text-base">
+                  {originalInput.length > 50
+                    ? originalInput.slice(0, 50) + "…"
+                    : originalInput}
+                </p>
+                <div className="mt-2 h-px w-full bg-gradient-to-r from-[#FFF2DB]/40 to-transparent" />
+              </div>
+            )}
+
+            {/* ── SPLITTING RAYS PREVIEW ── */}
+            {phase === "splitting" && (
+              <div className="absolute left-1/2 top-1/2 z-15 -translate-y-1/2">
+                {rayAngles.map((angle, i) => (
+                  <div
+                    key={i}
+                    className="absolute top-0 left-[180px] h-px origin-left animate-ray-extend"
+                    style={{
+                      width: "0px",
+                      background: rayColors[i],
+                      transform: `rotate(${angle}deg)`,
+                      animationDelay: `${i * 0.12}s`,
+                      opacity: 0.5,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* ── EXPLORATION PANEL ── */}
+            {phase === "exploring" && selectedBranch && (
+              <div className="absolute right-6 top-1/2 z-30 flex w-full max-w-md -translate-y-1/2 flex-col sm:right-16">
+                {/* Selected perspective header */}
+                <div className="mb-4 flex items-center gap-3">
+                  <button
+                    onClick={handleBackToBranches}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#FFF2DB]/10 transition hover:border-[#FFF2DB]/20"
+                    aria-label="Back to all branches"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-[#FFF2DB]/50" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <h2 className="font-[family-name:var(--font-audiowide)] text-base text-[#FFF2DB] sm:text-lg">
+                    {selectedBranch.label}
+                  </h2>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {exploration.split("\n\n").map((paragraph, i) => {
-                    if (paragraph.trim().startsWith("Related directions:")) {
-                      const lines = paragraph.trim().split("\n").slice(1);
-                      return (
-                        <div key={i} className="mt-6 border-t border-[#FFF2DB]/5 pt-5">
-                          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#F5A623]/70">
+
+                {/* Exploration content */}
+                <div className="max-h-[50vh] overflow-y-auto rounded-xl border border-[#FFF2DB]/5 bg-[#0d0d0d]/90 p-5 backdrop-blur-sm sm:p-6">
+                  {isExploring ? (
+                    <div className="flex flex-col items-center gap-3 py-10">
+                      <div className="flex gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#8B6CFF] animate-prizia-pulse" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#4DD9D0] animate-prizia-pulse" style={{ animationDelay: "0.2s" }} />
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#F5A623] animate-prizia-pulse" style={{ animationDelay: "0.4s" }} />
+                      </div>
+                      <p className="text-xs text-[#FFF2DB]/30">Exploring...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {parsedExploration.main.map((paragraph, i) => (
+                        <p key={i} className="text-sm leading-relaxed text-[#FFF2DB]/70">
+                          {paragraph}
+                        </p>
+                      ))}
+                      {parsedExploration.related.length > 0 && (
+                        <div className="mt-4 border-t border-[#FFF2DB]/5 pt-4">
+                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[#F5A623]/50">
                             Related directions
                           </p>
-                          <ul className="space-y-2">
-                            {lines.map((line, j) => (
-                              <li key={j} className="flex items-start gap-2 text-sm text-[#FFF2DB]/60">
-                                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#F5A623]/50" />
-                                {line.replace(/^-\s*/, "")}
+                          <ul className="space-y-1.5">
+                            {parsedExploration.related.map((rel, j) => (
+                              <li key={j} className="flex items-start gap-2 text-xs text-[#FFF2DB]/40">
+                                <span className="mt-1 h-0.5 w-0.5 shrink-0 rounded-full bg-[#F5A623]/40" />
+                                {rel}
                               </li>
                             ))}
                           </ul>
                         </div>
-                      );
-                    }
-                    return (
-                      <p key={i} className="text-sm font-medium leading-relaxed text-[#FFF2DB]/80 sm:text-base">
-                        {paragraph}
-                      </p>
-                    );
-                  })}
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Branch list below exploration */}
-            {!isExploring && (
-              <div className="mt-8">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#FFF2DB]/30">
-                  Other perspectives
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {branches
-                    .filter((b) => b.id !== selectedBranch.id)
-                    .map((branch) => (
-                      <button
-                        key={branch.id}
-                        onClick={() => handleExplore(branch)}
-                        className="rounded-full border border-[#FFF2DB]/8 bg-[#0d0d0d] px-4 py-2 text-sm text-[#FFF2DB]/50 transition hover:border-[#F5A623]/30 hover:text-[#F5A623] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F5A623]"
-                      >
-                        {branch.label}
-                      </button>
-                    ))}
-                </div>
+                {/* Other perspectives — small visual list */}
+                {!isExploring && (
+                  <div className="mt-4">
+                    <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[#FFF2DB]/20">
+                      Other perspectives
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {branches
+                        .filter((b) => b.id !== selectedBranch.id)
+                        .map((branch) => (
+                          <button
+                            key={branch.id}
+                            onClick={() => handleExplore(branch)}
+                            className="rounded-full border border-[#FFF2DB]/8 bg-transparent px-3 py-1.5 text-xs text-[#FFF2DB]/40 transition hover:border-[#F5A623]/20 hover:text-[#F5A623]/70"
+                          >
+                            {branch.label}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </section>
+          </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

@@ -10,6 +10,6 @@ interface ConditionalFooterProps {
 
 export default function ConditionalFooter({ footerConfig }: ConditionalFooterProps) {
   const pathname = usePathname();
-  if (pathname.startsWith("/prizia")) return null;
+  if (pathname.startsWith("/prizia") || pathname.startsWith("/prizm")) return null;
   return <Footer footer={footerConfig} />;
 }
