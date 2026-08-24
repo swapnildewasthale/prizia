@@ -85,7 +85,7 @@ function setByPath(obj: unknown, path: string, value: unknown): unknown {
 
 export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
-  const [editMode, setEditMode] = useState(true);
+  const [editMode, setEditMode] = useState(false);
   const [draft, setDraft] = useState<WebsiteConfig | null>(null);
   const [activeField, setActiveFieldState] = useState<string | null>(null);
   const [activeFieldLabel, setActiveFieldLabel] = useState<string | null>(null);
@@ -106,8 +106,12 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       .then((r) => r.json())
       .then((data) => {
         setAuthenticated(data.authenticated);
+        setEditMode(data.authenticated);
       })
-      .catch(() => setAuthenticated(false));
+      .catch(() => {
+        setAuthenticated(false);
+        setEditMode(false);
+      });
   }, []);
 
   useEffect(() => {
