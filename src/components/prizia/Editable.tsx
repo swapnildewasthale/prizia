@@ -10,6 +10,13 @@ interface EditableProps {
   supports?: EditableProperty[];
 }
 
+function findLinkHref(element: EventTarget | null): string | null {
+  if (!element || !(element instanceof HTMLElement)) return null;
+  const anchor = element.closest("a");
+  if (anchor?.href) return anchor.href;
+  return null;
+}
+
 export default function Editable({
   path,
   label,
@@ -25,11 +32,13 @@ export default function Editable({
   const isActive = editor.activeField === path;
 
   function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
     e.stopPropagation();
+    const linkHref = findLinkHref(e.target);
     if (isActive) {
       editor.setActiveField(null);
     } else {
-      editor.setActiveField(path, label, supports);
+      editor.setActiveField(path, label, supports, linkHref);
     }
   }
 

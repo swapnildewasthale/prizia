@@ -100,6 +100,29 @@ export default function WebsiteEditorPanel({ onBack }: WebsiteEditorPanelProps) 
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+        {/* Detected link from clicked element */}
+        {editor.activeFieldLink && (
+          <FieldGroup label="Link Detected">
+            <div className="flex items-center gap-2">
+              <span className="flex-1 truncate text-xs text-[#FFF2DB]/50" title={editor.activeFieldLink}>
+                {editor.activeFieldLink}
+              </span>
+              <a
+                href={editor.activeFieldLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0 flex items-center gap-1 rounded-lg border border-[#F5A623]/20 bg-[#F5A623]/10 px-2.5 py-1.5 text-xs font-medium text-[#F5A623] transition hover:bg-[#F5A623]/20"
+              >
+                Open destination
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3 w-3">
+                  <path d="M7 17L17 7M17 7H7M17 7v10" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </a>
+            </div>
+          </FieldGroup>
+        )}
+
         {/* Content */}
         {supports.includes("content") && (
           <FieldGroup label="Content">

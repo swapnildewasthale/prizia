@@ -20,10 +20,12 @@ interface WebsiteEditorContextValue {
   activeField: string | null;
   activeFieldLabel: string | null;
   activeFieldSupports: EditableProperty[];
+  activeFieldLink: string | null;
   setActiveField: (
     path: string | null,
     label?: string | null,
     supports?: EditableProperty[],
+    link?: string | null,
   ) => void;
   updateDraft: (path: string, value: unknown) => void;
   saveDraft: () => Promise<void>;
@@ -92,6 +94,7 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
   const [activeFieldSupports, setActiveFieldSupports] = useState<
     EditableProperty[]
   >(["content"]);
+  const [activeFieldLink, setActiveFieldLink] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -148,6 +151,7 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
         setActiveFieldState(null);
         setActiveFieldLabel(null);
         setActiveFieldSupports(["content"]);
+        setActiveFieldLink(null);
       }
       return !prev;
     });
@@ -158,10 +162,12 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       path: string | null,
       label: string | null = null,
       supports: EditableProperty[] = ["content"],
+      link: string | null = null,
     ) => {
       setActiveFieldState(path);
       setActiveFieldLabel(label);
       setActiveFieldSupports(supports);
+      setActiveFieldLink(link);
     },
     [],
   );
@@ -231,6 +237,7 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       setActiveFieldState(null);
       setActiveFieldLabel(null);
       setActiveFieldSupports(["content"]);
+      setActiveFieldLink(null);
       setHasChanges(false);
       setShowLogoutConfirm(false);
     }
@@ -245,6 +252,7 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       activeField,
       activeFieldLabel,
       activeFieldSupports,
+      activeFieldLink,
       setActiveField,
       updateDraft,
       saveDraft,
@@ -266,6 +274,7 @@ export function WebsiteEditorProvider({ children }: { children: ReactNode }) {
       activeField,
       activeFieldLabel,
       activeFieldSupports,
+      activeFieldLink,
       setActiveField,
       updateDraft,
       saveDraft,
